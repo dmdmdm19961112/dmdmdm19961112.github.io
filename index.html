@@ -337,7 +337,7 @@
                 
               
 
-              <time title="创建时间：2019-01-10 09:04:17 / 修改时间：11:49:24" itemprop="dateCreated datePublished" datetime="2019-01-10T09:04:17+08:00">2019-01-10</time>
+              <time title="创建时间：2019-01-10 09:04:17 / 修改时间：12:39:10" itemprop="dateCreated datePublished" datetime="2019-01-10T09:04:17+08:00">2019-01-10</time>
             
 
             
@@ -398,17 +398,17 @@
 <h3 id="索引的两面性"><a href="#索引的两面性" class="headerlink" title="索引的两面性"></a>索引的两面性</h3><p>事物都有两面性，索引使数据库查询数据的速度上升，但使写入数据的速度下降，因为索引的平衡树结构必须维持在正确的状态，增加删除修改数据都会改变索引的数据内容从而破坏树结构。在数据改变时，DBMS必须重新梳理索引树结构确保其正确，带来不小的性能开销，所以索引给查询以外的操作带来了副作用。</p>
 <h3 id="聚集索引"><a href="#聚集索引" class="headerlink" title="聚集索引"></a>聚集索引</h3><p>在数据库中，B+树索引可以分为聚集索引(clustered index)与辅助索引(secondary index)，聚集索引同辅助索引不同的是叶子节点是否存放着一整行的信息。</p>
 <p>InnoDB存储引擎表是索引组织表，即表中数据按照主键顺序存放，聚集索引即按照每张表的主键构造一棵B+树，叶子节点中存放整张表的行记录数据，此时表在磁盘上的存储结构为树状结构，相当于整个表成为了一个索引，索引组织表中数据也是索引的一部分，每个叶子节点通过一个双向链表来连接。注意每张表只能有一个聚集索引，因为每张表只能有一个主键。主键的关键作用就是将表的数据格式转换为B+树的格式存储。</p>
-<p><img src="https://images2015.cnblogs.com/blog/303980/201703/303980-20170331183916477-93039637.jpg" alt="img"></p>
+<p><img src="/2019/01/10/Mysql索引原理及使用/1.jpg" alt=""></p>
 <p>树中的所有节点（除了叶子节点）存放的都是键值以及指向数据页的偏移量而不是完整的行记录。下面设id为table表的主键，执行一个sql语句:</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1996</span></span><br></pre></td></tr></table></figure>
 <p>首先根据索引定位到1996这个值所在的叶节点，再根据叶节点可以取到id = 1996的数据行，此时的查找效率是比较高的：</p>
-<p><img src="https://images2015.cnblogs.com/blog/303980/201703/303980-20170331183927805-434571358.jpg" alt="img"></p>
+<p><img src="/2019/01/10/Mysql索引原理及使用/3.jpg" alt=""></p>
 <p>多数情况下，查询优化器倾向于使用聚集索引，因为聚集索引能在B+树的叶子节点上直接找到数据。</p>
 <h3 id="辅助索引"><a href="#辅助索引" class="headerlink" title="辅助索引"></a>辅助索引</h3><p>辅助索引（Secondary Index)和聚集索引一样，都是采用B+树作为索引存储的数据结构，索引树结构中各节点值来自表中的索引字段，比如说给一个名为user的表加上索引，则索引就由name字段中的值构成，数据发生改变时，DBMS会一直维护索引结构的正确性。若给表中多个字段加上索引。会出现 多个独立的索引结构，每个辅助索引间不存在关联。</p>
-<p><img src="https://images2015.cnblogs.com/blog/303980/201703/303980-20170331184008805-68908020.jpg" alt="img"></p>
+<p><img src="/2019/01/10/Mysql索引原理及使用/2.jpg" alt=""></p>
 <p>每次给字段建一个新索引时，字段中的数据被复制一份出来用于生成索引。给表添加索引会更多的占用磁盘的存储空间。</p>
 <p>在InnoDB中，辅助索引的书签就是相应行数据的聚集索引键，通过辅助索引来查找数据时，InnoDB会遍历辅助索引而且通过其上叶子节点的指针获得对应主键的值（辅助索引的叶子节点包含索引列的值与主键的值)，比如在一棵高度为三的辅助索引树中查找数据，那么需要对这棵辅助索引树遍历三次找到对应的主键，然后再对聚集索引树进行三次查找，最后找到完整数据行对应的叶子节点，一共需要6次逻辑IO访问得到最终的数据页。下图是一个辅助索引寻找数据的示意图：</p>
-<p><img src="https://images2015.cnblogs.com/blog/303980/201703/303980-20170331184024758-1937607304.jpg" alt="img"></p>
+<p><img src="/2019/01/10/Mysql索引原理及使用/4.jpg" alt=""></p>
 <h3 id="联合索引的使用"><a href="#联合索引的使用" class="headerlink" title="联合索引的使用"></a>联合索引的使用</h3><p>联合索引指对表上的多个列进行索引，联合索引创建方法与单个索引相同，但是其中有多个索引列，例如下表</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> T(</span><br><span class="line">    a <span class="built_in">INT</span>,</span><br><span class="line">    b <span class="built_in">INT</span>,</span><br><span class="line">    PRIMARY <span class="keyword">KEY</span> (a),</span><br><span class="line">    <span class="keyword">KEY</span> idx_a_b (a,b)</span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">INNODB</span></span><br></pre></td></tr></table></figure>
 <p>联合索引本质上也是一棵B+树，联合索引的键值也是排序的，键值数量大于或等于2，键值也是排序的，就这个例子来说，排序方式即(1,1),(1,2),(2,1),(2,4),(3,1),(3,2)，数据按(a,b)的方式进行了存放。</p>
