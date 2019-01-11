@@ -96,21 +96,23 @@
 
 
 
-  <meta name="description" content="什么是索引索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。 没有索引会出现什么状况建立一个数据表Employee，该表中有三列 1Employee_Name,Employee_Age,Employee_Address 接下来执行查询 1SELECT * FROM Employee WHERE E">
+  <meta name="description" content="什么是索引索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。 索引优化应该是对查询性能优化最有效的手段，索引能轻易将查询性能提高几个数量级，“最优”的索引有时比一个好的“索引”性能好两个数量级。 没有索引会出现什么状况建立一个数据表Employee，该表中有三列 1Employee_Name,Em">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mysql InnoDB索引原理与使用">
 <meta property="og:url" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
-<meta property="og:description" content="什么是索引索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。 没有索引会出现什么状况建立一个数据表Employee，该表中有三列 1Employee_Name,Employee_Age,Employee_Address 接下来执行查询 1SELECT * FROM Employee WHERE E">
+<meta property="og:description" content="什么是索引索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。 索引优化应该是对查询性能优化最有效的手段，索引能轻易将查询性能提高几个数量级，“最优”的索引有时比一个好的“索引”性能好两个数量级。 没有索引会出现什么状况建立一个数据表Employee，该表中有三列 1Employee_Name,Em">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/1.jpg">
 <meta property="og:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/3.jpg">
 <meta property="og:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/2.jpg">
 <meta property="og:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/4.jpg">
-<meta property="og:updated_time" content="2019-01-10T04:39:10.864Z">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/5.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/6.jpg">
+<meta property="og:updated_time" content="2019-01-11T02:46:06.240Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mysql InnoDB索引原理与使用">
-<meta name="twitter:description" content="什么是索引索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。 没有索引会出现什么状况建立一个数据表Employee，该表中有三列 1Employee_Name,Employee_Age,Employee_Address 接下来执行查询 1SELECT * FROM Employee WHERE E">
+<meta name="twitter:description" content="什么是索引索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。 索引优化应该是对查询性能优化最有效的手段，索引能轻易将查询性能提高几个数量级，“最优”的索引有时比一个好的“索引”性能好两个数量级。 没有索引会出现什么状况建立一个数据表Employee，该表中有三列 1Employee_Name,Em">
 <meta name="twitter:image" content="http://yoursite.com/2019/01/10/Mysql索引原理及使用/1.jpg">
 
 
@@ -340,12 +342,24 @@
                 
               
 
-              <time title="创建时间：2019-01-10 09:04:17 / 修改时间：12:39:10" itemprop="dateCreated datePublished" datetime="2019-01-10T09:04:17+08:00">2019-01-10</time>
+              <time title="创建时间：2019-01-10 09:04:17" itemprop="dateCreated datePublished" datetime="2019-01-10T09:04:17+08:00">2019-01-10</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-01-11 10:46:06" itemprop="dateModified" datetime="2019-01-11T10:46:06+08:00">2019-01-11</time>
               
             
           </span>
@@ -390,6 +404,7 @@
 
       
         <h3 id="什么是索引"><a href="#什么是索引" class="headerlink" title="什么是索引"></a>什么是索引</h3><p>索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。</p>
+<p>索引优化应该是对查询性能优化最有效的手段，索引能轻易将查询性能提高几个数量级，“最优”的索引有时比一个好的“索引”性能好两个数量级。</p>
 <h3 id="没有索引会出现什么状况"><a href="#没有索引会出现什么状况" class="headerlink" title="没有索引会出现什么状况"></a>没有索引会出现什么状况</h3><p>建立一个数据表Employee，该表中有三列</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Employee_Name,Employee_Age,Employee_Address</span><br></pre></td></tr></table></figure>
 <p>接下来执行查询</p>
@@ -412,8 +427,36 @@
 <p><img src="/2019/01/10/Mysql索引原理及使用/4.jpg" alt=""></p>
 <h3 id="联合索引的使用"><a href="#联合索引的使用" class="headerlink" title="联合索引的使用"></a>联合索引的使用</h3><p>联合索引指对表上的多个列进行索引，联合索引创建方法与单个索引相同，但是其中有多个索引列，例如下表</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> T(</span><br><span class="line">    a <span class="built_in">INT</span>,</span><br><span class="line">    b <span class="built_in">INT</span>,</span><br><span class="line">    PRIMARY <span class="keyword">KEY</span> (a),</span><br><span class="line">    <span class="keyword">KEY</span> idx_a_b (a,b)</span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">INNODB</span></span><br></pre></td></tr></table></figure>
-<p>联合索引本质上也是一棵B+树，联合索引的键值也是排序的，键值数量大于或等于2，键值也是排序的，就这个例子来说，排序方式即(1,1),(1,2),(2,1),(2,4),(3,1),(3,2)，数据按(a,b)的方式进行了存放。</p>
-<h3 id="覆盖索引的使用"><a href="#覆盖索引的使用" class="headerlink" title="覆盖索引的使用"></a>覆盖索引的使用</h3>
+<p>联合索引本质上也是一棵B+树，联合索引的键值也是排序的，键值数量大于或等于2，键值也是排序的，就这个例子来说，排序方式即(1,1),(1,2),(2,1),(2,4),(3,1),(3,2)，数据按(a,b)的方式进行了存放。对于单个的a列查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a = xxx</span><br></pre></td></tr></table></figure>
+<p>显然可以使用这个(a,b)索引，对于查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a = xxx <span class="keyword">and</span> b = xxx</span><br></pre></td></tr></table></figure>
+<p>显然也是可以使用这个联合索引的。但注意对于单独的b列查询SELECT <em> FROM TABLE WHERE b = **</em>，则不可以使用这棵b+树索引。联合索引的第二个好处是对第二个键值进行了排序处理，比如某个情况下要查询某个用户的购物情况，并按照时间进行排序，取出最近三次的购买记录，这时使用联合索引可以避免多一次的排序操作，因为索引本身在叶子节点已经排序了。这里给出一个例子，根据以下代码创建测试表buy_log:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> buy_log (</span><br><span class="line">    userid <span class="built_in">INT</span> <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">    buy_date <span class="built_in">DATE</span></span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">INNODB</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-01-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">2</span>,<span class="string">'2019-01-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">3</span>,<span class="string">'2019-01-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-02-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">3</span>,<span class="string">'2019-02-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-03-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-04-11'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> <span class="keyword">KEY</span> (userid);</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> <span class="keyword">KEY</span> (userid, buy_date);</span><br></pre></td></tr></table></figure>
+<p>以上代码建立两个索引进行比较，两个索引都包含userid字段。若只对userid进行查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> buy_log <span class="keyword">WHERE</span> userid=<span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+<p>从possible_keys可以看出有两个索引可供使用，分别是单个的userid索引和(userid, buy_date)的联合索引。但是优化器最终的选择是索引userid,因为该索引的叶子节点只包含单个键值，理论上一个页能够存放的记录更多。</p>
+<p>再下面想要取出userid为1的最近3次的购买记录，SQL语句如下:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> buy_log <span class="keyword">WHERE</span> userid = <span class="number">1</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> buy_date <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+<p>这里使用EXPLAIN关键字，可知优化器使用了联合索引，因为在联合索引中buy_date已经排序好了。根据该联合索引取出数据，无须再对buy_date做一次额外的排序操作。若强制使用userid索引，则在执行计划的Extra选项中可以看到Using filesort，即需要额外的一次排序操作才能完成查询。注意，联合索引(a, b)其实是根据列a,b进行排序，下列语句直接使用联合索引得到结果:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> b</span><br></pre></td></tr></table></figure>
+<p>对于联合索引(a, b, c)来说，下列语句同样可以直接通过联合索引得到结果:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> b;</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">AND</span> b=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> c;</span><br></pre></td></tr></table></figure>
+<p>但是注意，对于下面的语句，联合索引不能直接得到结果，还需要执行一次filesort排序操作，因为索引(a, c)并未排序：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> c</span><br></pre></td></tr></table></figure>
+<h3 id="覆盖索引的使用"><a href="#覆盖索引的使用" class="headerlink" title="覆盖索引的使用"></a>覆盖索引的使用</h3><p>InnoDB存储引擎支持覆盖索引(covering index)，即从辅助索引中就能够得到查询的记录，而不需要去查询聚集索引中的记录，记住聚集索引(主键)是通往真实数据所在的唯一途径。但覆盖索引是一种例外可以不使用聚集索引就能查询出所需要的数据。注意当为字段建立索引后，字段中的内容被同步至索引中，辅助索引大小远小于聚集索引，因此可以减少大量的IO操作，先看下面这个SQL语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">INDEX</span> index_birthday <span class="keyword">ON</span> user_info(birthday)</span><br></pre></td></tr></table></figure>
+<p>查询生日在1996年11月1日出生的用户名：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> user_name <span class="keyword">FROM</span> user_info <span class="keyword">WHERE</span> birthday = <span class="string">'1996-11-01'</span></span><br></pre></td></tr></table></figure>
+<p>这句SELECT语句的执行过程如下，首先，通过非聚集索引index_birthday查找birthday为1996-11-01的所有记录的主键ID值，再通过得到的主键ID值进行聚集索引查找，最后从得到的真实数据中取得user_name字段的值返回。</p>
+<p>下面我们修改birthday上的索引为一个双字段的覆盖索引：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">INDEX</span> index_birthday_and_user_name <span class="keyword">ON</span> user_info(birthday, user_name);</span><br></pre></td></tr></table></figure>
+<p>这句SELECT语句的执行过程会变成通过辅助索引index_birthday_and_user_name查找birthday为1996-11-01的叶节点内容，此时user_name字段的值也在叶节点中，所以不需要通过主键ID值查找数据行的真实所在，直接取得叶节点中user_name的值返回就可以了，这种覆盖索引查找的方式大大提高了查询性能：</p>
+<p><img src="/2019/01/10/Mysql索引原理及使用/5.jpg" alt=""></p>
+<p>参考书籍：</p>
+<p>高性能Mysql(High Performance MySQL)</p>
+<p><img src="/2019/01/10/Mysql索引原理及使用/6.jpg" alt=""></p>
+
       
     </div>
 
