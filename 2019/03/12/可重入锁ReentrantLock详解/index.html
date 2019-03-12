@@ -96,23 +96,24 @@
 
 
 
-  <meta name="description" content="编程随想">
-<meta property="og:type" content="website">
-<meta property="og:title" content="sleepyhead沉思录">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="可重入锁ReentrantLock可重入锁简单示例可重入锁可以完全替代synchronized关键字，JDK5.0早期版本中可重入锁性能远远好于synchronized，而从JDK6.0开始，JDK在synchronized上进行了大量的优化，现在两者的性能差别并不大 。 重入锁使用java.util.concurrent.locks.ReentrantLock类来实现，下面是一段简单的重入锁使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="可重入锁ReentrantLock详解">
+<meta property="og:url" content="http://yoursite.com/2019/03/12/可重入锁ReentrantLock详解/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
-<meta property="og:description" content="编程随想">
+<meta property="og:description" content="可重入锁ReentrantLock可重入锁简单示例可重入锁可以完全替代synchronized关键字，JDK5.0早期版本中可重入锁性能远远好于synchronized，而从JDK6.0开始，JDK在synchronized上进行了大量的优化，现在两者的性能差别并不大 。 重入锁使用java.util.concurrent.locks.ReentrantLock类来实现，下面是一段简单的重入锁使用">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-12T13:57:31.508Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="sleepyhead沉思录">
-<meta name="twitter:description" content="编程随想">
+<meta name="twitter:title" content="可重入锁ReentrantLock详解">
+<meta name="twitter:description" content="可重入锁ReentrantLock可重入锁简单示例可重入锁可以完全替代synchronized关键字，JDK5.0早期版本中可重入锁性能远远好于synchronized，而从JDK6.0开始，JDK在synchronized上进行了大量的优化，现在两者的性能差别并不大 。 重入锁使用java.util.concurrent.locks.ReentrantLock类来实现，下面是一段简单的重入锁使用">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/">
+  <link rel="canonical" href="http://yoursite.com/2019/03/12/可重入锁ReentrantLock详解/">
 
 
 
@@ -122,7 +123,7 @@
   };
 </script>
 
-  <title>sleepyhead沉思录</title>
+  <title>可重入锁ReentrantLock详解 | sleepyhead沉思录</title>
   
 
 
@@ -170,8 +171,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -213,7 +213,7 @@
         
         
           
-          <li class="menu-item menu-item-home menu-item-active">
+          <li class="menu-item menu-item-home">
 
     
     
@@ -275,9 +275,9 @@
           
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -309,10 +309,8 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/03/12/可重入锁ReentrantLock详解/" class="post-title-link" itemprop="url">可重入锁ReentrantLock详解</a>
+          <h1 class="post-title" itemprop="name headline">可重入锁ReentrantLock详解
+
               
             
           </h1>
@@ -386,9 +384,7 @@
       
 
       
-        
-          
-            <h1 id="可重入锁ReentrantLock"><a href="#可重入锁ReentrantLock" class="headerlink" title="可重入锁ReentrantLock"></a>可重入锁ReentrantLock</h1><h2 id="可重入锁简单示例"><a href="#可重入锁简单示例" class="headerlink" title="可重入锁简单示例"></a>可重入锁简单示例</h2><p>可重入锁可以完全替代synchronized关键字，JDK5.0早期版本中可重入锁性能远远好于synchronized，而从JDK6.0开始，JDK在synchronized上进行了大量的优化，<strong>现在两者的性能差别并不大</strong> 。</p>
+        <h1 id="可重入锁ReentrantLock"><a href="#可重入锁ReentrantLock" class="headerlink" title="可重入锁ReentrantLock"></a>可重入锁ReentrantLock</h1><h2 id="可重入锁简单示例"><a href="#可重入锁简单示例" class="headerlink" title="可重入锁简单示例"></a>可重入锁简单示例</h2><p>可重入锁可以完全替代synchronized关键字，JDK5.0早期版本中可重入锁性能远远好于synchronized，而从JDK6.0开始，JDK在synchronized上进行了大量的优化，<strong>现在两者的性能差别并不大</strong> 。</p>
 <p>重入锁使用<strong>java.util.concurrent.locks.ReentrantLock</strong>类来实现，下面是一段简单的重入锁使用案例。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">package com.example.reentrantLock;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">//可重入锁的简单应用</span><br><span class="line">public class ReenterLock implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    public static int i = 0;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        for (int j = 0; j &lt; 10000000; j++) &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            //可重入锁是可以反复进入的</span><br><span class="line">            //lock.lock();</span><br><span class="line">            try &#123;</span><br><span class="line">                i++;</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">                //lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        ReenterLock tl = new ReenterLock();</span><br><span class="line">        //启动线程的方法之一</span><br><span class="line">        Thread t1 = new Thread(tl);</span><br><span class="line">        Thread t2 = new Thread(tl);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        //join方法会抛出InterruptedException异常，join()方法会阻塞当前线程直至目标线程执行完毕</span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>可重入锁是可以反复进入的，但这里的反复仅局限于一个线程，<strong>一个线程连续两次获得同一把锁，是允许的 </strong>，但需要注意，若一个线程多次获得锁，释放锁时也必须释放相同次数，如果释放锁的次数多了，会得到IllegalMonitorStateException异常，若释放锁的次数少了，相当于线程还持有这个锁，此时，其他线程也无法进入临界区。可重入锁还有一些高级功能，比如提供<strong>中断处理</strong>的能力：</p>
@@ -422,8 +418,6 @@
 <li>阻塞原语park()与unpark()，用来挂起和恢复线程。没有得到锁的线程将被挂起。</li>
 </ul>
 
-          
-        
       
     </div>
 
@@ -446,229 +440,28 @@
       
 
       
-
-      
-
       
       
-        <div class="post-eof"></div>
+
       
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/10/Mysql索引原理及使用/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="段铭">
-      <meta itemprop="description" content="编程随想">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="sleepyhead沉思录">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/01/10/Mysql索引原理及使用/" class="post-title-link" itemprop="url">Mysql InnoDB索引原理与使用</a>
-              
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
+              <a href="/2019/01/10/Mysql索引原理及使用/" rel="next" title="Mysql InnoDB索引原理与使用">
+                <i class="fa fa-chevron-left"></i> Mysql InnoDB索引原理与使用
+              </a>
             
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
             
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-10 09:04:17" itemprop="dateCreated datePublished" datetime="2019-01-10T09:04:17+08:00">2019-01-10</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-01-11 10:46:06" itemprop="dateModified" datetime="2019-01-11T10:46:06+08:00">2019-01-11</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/10/Mysql索引原理及使用/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/01/10/Mysql索引原理及使用/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <h3 id="什么是索引"><a href="#什么是索引" class="headerlink" title="什么是索引"></a>什么是索引</h3><p>索引是一个数据结构，该数据结构存储在磁盘上，其中存储了表中某一列的所有值，即索引是基于数据库表中的某一列上的数据组成，而且这些数据存储在某个数据结构中。</p>
-<p>索引优化应该是对查询性能优化最有效的手段，索引能轻易将查询性能提高几个数量级，“最优”的索引有时比一个好的“索引”性能好两个数量级。</p>
-<h3 id="没有索引会出现什么状况"><a href="#没有索引会出现什么状况" class="headerlink" title="没有索引会出现什么状况"></a>没有索引会出现什么状况</h3><p>建立一个数据表Employee，该表中有三列</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Employee_Name,Employee_Age,Employee_Address</span><br></pre></td></tr></table></figure>
-<p>接下来执行查询</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Employee <span class="keyword">WHERE</span> Employee_Name = <span class="string">'Jesus'</span></span><br></pre></td></tr></table></figure>
-<p>执行这条查询后，数据库系统逐行遍历整张表，对每一行检查Employee_Name是否等于”Jesus”，此时要查找所有名字叫“Jesus”的员工，所以在查找到一条名为”Jesus“的员工记录后，并不能停止查找，这是因为还有其他名叫”Jesus“的员工，此时对于表中的每一条数据，数据库都要进行检查，即进行全表扫描(full table scan)。全表扫描的效率太低，此时加上适当的索引能够加快进行查询的速度，索引从根本上减少了需要扫描的行的数量。</p>
-<h3 id="索引使查找速度加快"><a href="#索引使查找速度加快" class="headerlink" title="索引使查找速度加快"></a>索引使查找速度加快</h3><p>比如说，一张表有一亿条数据，要查找其中某一条数据，如果一条条进行匹配，最坏情况下匹配一亿次才能得到结果，即为O(n)时间复杂度，这显然无法接受。但若将这张表转换为平衡树结构（一棵节点非常多的树），假设这棵树有十层，通过10次IO开销即可查找到索引所需数据，速度以指数级别提升，得到了O(log n)的复杂度，其中的n为记录总数，而其对数底数是数分叉的个数，结果即为树的层次数，查询次数由亿降为个位数，此时的索引使数据库查询性能有极大提升。</p>
-<h3 id="索引的两面性"><a href="#索引的两面性" class="headerlink" title="索引的两面性"></a>索引的两面性</h3><p>事物都有两面性，索引使数据库查询数据的速度上升，但使写入数据的速度下降，因为索引的平衡树结构必须维持在正确的状态，增加删除修改数据都会改变索引的数据内容从而破坏树结构。在数据改变时，DBMS必须重新梳理索引树结构确保其正确，带来不小的性能开销，所以索引给查询以外的操作带来了副作用。</p>
-<h3 id="聚集索引"><a href="#聚集索引" class="headerlink" title="聚集索引"></a>聚集索引</h3><p>在数据库中，B+树索引可以分为聚集索引(clustered index)与辅助索引(secondary index)，聚集索引同辅助索引不同的是叶子节点是否存放着一整行的信息。</p>
-<p>InnoDB存储引擎表是索引组织表，即表中数据按照主键顺序存放，聚集索引即按照每张表的主键构造一棵B+树，叶子节点中存放整张表的行记录数据，此时表在磁盘上的存储结构为树状结构，相当于整个表成为了一个索引，索引组织表中数据也是索引的一部分，每个叶子节点通过一个双向链表来连接。注意每张表只能有一个聚集索引，因为每张表只能有一个主键。主键的关键作用就是将表的数据格式转换为B+树的格式存储。</p>
-<p><img src="/2019/01/10/Mysql索引原理及使用/1.jpg" alt=""></p>
-<p>树中的所有节点（除了叶子节点）存放的都是键值以及指向数据页的偏移量而不是完整的行记录。下面设id为table表的主键，执行一个sql语句:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> <span class="keyword">id</span> = <span class="number">1996</span></span><br></pre></td></tr></table></figure>
-<p>首先根据索引定位到1996这个值所在的叶节点，再根据叶节点可以取到id = 1996的数据行，此时的查找效率是比较高的：</p>
-<p><img src="/2019/01/10/Mysql索引原理及使用/3.jpg" alt=""></p>
-<p>多数情况下，查询优化器倾向于使用聚集索引，因为聚集索引能在B+树的叶子节点上直接找到数据。</p>
-<h3 id="辅助索引"><a href="#辅助索引" class="headerlink" title="辅助索引"></a>辅助索引</h3><p>辅助索引（Secondary Index)和聚集索引一样，都是采用B+树作为索引存储的数据结构，索引树结构中各节点值来自表中的索引字段，比如说给一个名为user的表加上索引，则索引就由name字段中的值构成，数据发生改变时，DBMS会一直维护索引结构的正确性。若给表中多个字段加上索引。会出现 多个独立的索引结构，每个辅助索引间不存在关联。</p>
-<p><img src="/2019/01/10/Mysql索引原理及使用/2.jpg" alt=""></p>
-<p>每次给字段建一个新索引时，字段中的数据被复制一份出来用于生成索引。给表添加索引会更多的占用磁盘的存储空间。</p>
-<p>在InnoDB中，辅助索引的书签就是相应行数据的聚集索引键，通过辅助索引来查找数据时，InnoDB会遍历辅助索引而且通过其上叶子节点的指针获得对应主键的值（辅助索引的叶子节点包含索引列的值与主键的值)，比如在一棵高度为三的辅助索引树中查找数据，那么需要对这棵辅助索引树遍历三次找到对应的主键，然后再对聚集索引树进行三次查找，最后找到完整数据行对应的叶子节点，一共需要6次逻辑IO访问得到最终的数据页。下图是一个辅助索引寻找数据的示意图：</p>
-<p><img src="/2019/01/10/Mysql索引原理及使用/4.jpg" alt=""></p>
-<h3 id="联合索引的使用"><a href="#联合索引的使用" class="headerlink" title="联合索引的使用"></a>联合索引的使用</h3><p>联合索引指对表上的多个列进行索引，联合索引创建方法与单个索引相同，但是其中有多个索引列，例如下表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> T(</span><br><span class="line">    a <span class="built_in">INT</span>,</span><br><span class="line">    b <span class="built_in">INT</span>,</span><br><span class="line">    PRIMARY <span class="keyword">KEY</span> (a),</span><br><span class="line">    <span class="keyword">KEY</span> idx_a_b (a,b)</span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">INNODB</span></span><br></pre></td></tr></table></figure>
-<p>联合索引本质上也是一棵B+树，联合索引的键值也是排序的，键值数量大于或等于2，键值也是排序的，就这个例子来说，排序方式即(1,1),(1,2),(2,1),(2,4),(3,1),(3,2)，数据按(a,b)的方式进行了存放。对于单个的a列查询</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a = xxx</span><br></pre></td></tr></table></figure>
-<p>显然可以使用这个(a,b)索引，对于查询</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a = xxx <span class="keyword">and</span> b = xxx</span><br></pre></td></tr></table></figure>
-<p>显然也是可以使用这个联合索引的。但注意对于单独的b列查询SELECT <em> FROM TABLE WHERE b = **</em>，则不可以使用这棵b+树索引。联合索引的第二个好处是对第二个键值进行了排序处理，比如某个情况下要查询某个用户的购物情况，并按照时间进行排序，取出最近三次的购买记录，这时使用联合索引可以避免多一次的排序操作，因为索引本身在叶子节点已经排序了。这里给出一个例子，根据以下代码创建测试表buy_log:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> buy_log (</span><br><span class="line">    userid <span class="built_in">INT</span> <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">    buy_date <span class="built_in">DATE</span></span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">INNODB</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-01-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">2</span>,<span class="string">'2019-01-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">3</span>,<span class="string">'2019-01-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-02-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">3</span>,<span class="string">'2019-02-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-03-11'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> buy_log <span class="keyword">VALUES</span> (<span class="number">1</span>,<span class="string">'2019-04-11'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> <span class="keyword">KEY</span> (userid);</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> buy_log <span class="keyword">ADD</span> <span class="keyword">KEY</span> (userid, buy_date);</span><br></pre></td></tr></table></figure>
-<p>以上代码建立两个索引进行比较，两个索引都包含userid字段。若只对userid进行查询：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> buy_log <span class="keyword">WHERE</span> userid=<span class="number">2</span>;</span><br></pre></td></tr></table></figure>
-<p>从possible_keys可以看出有两个索引可供使用，分别是单个的userid索引和(userid, buy_date)的联合索引。但是优化器最终的选择是索引userid,因为该索引的叶子节点只包含单个键值，理论上一个页能够存放的记录更多。</p>
-<p>再下面想要取出userid为1的最近3次的购买记录，SQL语句如下:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> buy_log <span class="keyword">WHERE</span> userid = <span class="number">1</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> buy_date <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
-<p>这里使用EXPLAIN关键字，可知优化器使用了联合索引，因为在联合索引中buy_date已经排序好了。根据该联合索引取出数据，无须再对buy_date做一次额外的排序操作。若强制使用userid索引，则在执行计划的Extra选项中可以看到Using filesort，即需要额外的一次排序操作才能完成查询。注意，联合索引(a, b)其实是根据列a,b进行排序，下列语句直接使用联合索引得到结果:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> b</span><br></pre></td></tr></table></figure>
-<p>对于联合索引(a, b, c)来说，下列语句同样可以直接通过联合索引得到结果:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> b;</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">AND</span> b=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> c;</span><br></pre></td></tr></table></figure>
-<p>但是注意，对于下面的语句，联合索引不能直接得到结果，还需要执行一次filesort排序操作，因为索引(a, c)并未排序：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> a=xxx <span class="keyword">ORDER</span> <span class="keyword">BY</span> c</span><br></pre></td></tr></table></figure>
-<h3 id="覆盖索引的使用"><a href="#覆盖索引的使用" class="headerlink" title="覆盖索引的使用"></a>覆盖索引的使用</h3><p>InnoDB存储引擎支持覆盖索引(covering index)，即从辅助索引中就能够得到查询的记录，而不需要去查询聚集索引中的记录，记住聚集索引(主键)是通往真实数据所在的唯一途径。但覆盖索引是一种例外可以不使用聚集索引就能查询出所需要的数据。注意当为字段建立索引后，字段中的内容被同步至索引中，辅助索引大小远小于聚集索引，因此可以减少大量的IO操作，先看下面这个SQL语句：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">INDEX</span> index_birthday <span class="keyword">ON</span> user_info(birthday)</span><br></pre></td></tr></table></figure>
-<p>查询生日在1996年11月1日出生的用户名：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> user_name <span class="keyword">FROM</span> user_info <span class="keyword">WHERE</span> birthday = <span class="string">'1996-11-01'</span></span><br></pre></td></tr></table></figure>
-<p>这句SELECT语句的执行过程如下，首先，通过非聚集索引index_birthday查找birthday为1996-11-01的所有记录的主键ID值，再通过得到的主键ID值进行聚集索引查找，最后从得到的真实数据中取得user_name字段的值返回。</p>
-<p>下面我们修改birthday上的索引为一个双字段的覆盖索引：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">INDEX</span> index_birthday_and_user_name <span class="keyword">ON</span> user_info(birthday, user_name);</span><br></pre></td></tr></table></figure>
-<p>这句SELECT语句的执行过程会变成通过辅助索引index_birthday_and_user_name查找birthday为1996-11-01的叶节点内容，此时user_name字段的值也在叶节点中，所以不需要通过主键ID值查找数据行的真实所在，直接取得叶节点中user_name的值返回就可以了，这种覆盖索引查找的方式大大提高了查询性能：</p>
-<p><img src="/2019/01/10/Mysql索引原理及使用/5.jpg" alt=""></p>
-<p>参考书籍：</p>
-<p>高性能Mysql(High Performance MySQL)</p>
-<p><img src="/2019/01/10/Mysql索引原理及使用/6.jpg" alt=""></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -678,208 +471,22 @@
   </article>
 
 
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/09/InnoDB关键特性/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="段铭">
-      <meta itemprop="description" content="编程随想">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="sleepyhead沉思录">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/01/09/InnoDB关键特性/" class="post-title-link" itemprop="url">InnoDB关键特性</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-09 20:29:14" itemprop="dateCreated datePublished" datetime="2019-01-09T20:29:14+08:00">2019-01-09</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-01-11 16:22:57" itemprop="dateModified" datetime="2019-01-11T16:22:57+08:00">2019-01-11</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/09/InnoDB关键特性/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/01/09/InnoDB关键特性/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="插入缓冲-Insert-Buffer-以及它解决的问题"><a href="#插入缓冲-Insert-Buffer-以及它解决的问题" class="headerlink" title="插入缓冲(Insert Buffer)以及它解决的问题"></a>插入缓冲(Insert Buffer)以及它解决的问题</h3><p> 插入缓冲这个名字可能会让人以为插入缓冲是缓冲池的一个组成部分，其实不然，插入缓冲和数据页一样，都是物理页的一个组成部分，插入缓冲为解决非聚集索引的写性能问题（插入或更新）而设计。对非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在则直接插入；不在则先放入到一个Insert Buffer对象中，此时起到了欺骗的效果，看似数据库这个非聚集索引已经插入到了叶子节点，然而并非如此，只是存放在另一个位置。然后再以一定的频率以及情况进行Insert Buffer同辅助索引页子节点的merge操作，此时通常能将多个插入合并到一个操作中，这就大大提高了<strong>非聚集索引插入的性能</strong>。</p>
-<p>Insert Buffer的使用要满足以下两个条件：</p>
-<ul>
-<li>索引是辅助索引</li>
-<li>索引不是唯一的</li>
-</ul>
-<p>满足以上两个条件时使用Insert Buffer，提高插入操作的性能。不过有这样一种情况，即应用程序进行大量的插入操作，这些都涉及了不唯一的非聚集索引，即使用了Insert Buffer。若此时Mysql数据库发生了宕机，肯定有大量的Insert Buffer未合并到实际的非聚集索引中，此时要恢复可能会耗费很长的时间。</p>
-<p>目前，Insert Buffer存在一个问题，即写密集的情况下，插入缓冲会占用过多缓冲池内存(innodb_buffer_pool)，默认最大可以占用1/2的缓冲池内存。修改IBUF_POOL_SIZE_PER_MAX_SIZE就可以对插入缓冲的大小进行控制，比如将IBUF_POOL_SIZE_PER_MAX_SIZE改为3，则最大只能使用1/3的缓冲池内存。</p>
-<p>现在说说插入缓冲具体是什么，Insert Buffer的数据结构是一棵B+树，现在的MySQL版本中，全局只有一棵Insert Buffer B+树，负责对所有的表的辅助索引进行Insert Buffer，而这棵B+树存放在共享表空间中，即ibdata1中。因此通过独立表空间ibd文件恢复表中数据时往往会导致CHECK TABLE失败。因为表辅助索引的数据还在Insert Buffer中，即共享表空间中，通过ibd文件恢复后，还需要进行REPAIR TABLE来重建表上的辅助索引。</p>
-<h3 id="自适应哈希索引"><a href="#自适应哈希索引" class="headerlink" title="自适应哈希索引"></a>自适应哈希索引</h3><p>哈希(hash)是一种非常快的查询方法，一般情况下这种查找的时间复杂度为O(1)，一般需要一次查找即可定位数据，而B+树的查询次数，取决于B+树的高度，常需要3到4次的查询。</p>
-<p>自适应哈希索引(adaptive hash index)，是InnoDB引擎的一个特殊功能，当InnoDB发现某些索引值使用十分频繁时，它会在内存中基于B-Tree索引上再创建一个哈希索引，这样可以让B-Tree索引也具有哈希索引的一些优点，比如快速的哈希查找。自适应哈希索引是一个完全自动的内部行为，用户无法控制或配置，但是有必要的话可以关闭该功能。</p>
-<p>InnoDB存储引擎监控对一个表上各个索引页的查询，若是发现在索引页上建立哈希索引可以带来速度提升，则建立哈希索引，称为自适应哈希索引(AHI)。AHI由缓冲池的B+树页建立哈希索引，建立速度很快，不需要对整张表建立哈希索引。InnoDB存储引擎自动根据访问频率和模式来自动为某些热点页建立哈希索引。</p>
-<p>AHI有一个要求，即对这个页的连续访问模式必须是一样的。比如对(a,b)这样的联合索引页，访问模式可以是以下情况：</p>
-<ul>
-<li><p>WHERE a=xxx</p>
-</li>
-<li><p>WHERE a=xxx AND b=xxx</p>
-</li>
-</ul>
-<p>访问模式一样指查询条件一样，交替进行上述两种查询的话，则InnoDB存储引擎不会对该页构造AHI。启用AHI后，读取和写入速度可以提高2倍。辅助索引的连接操作性能可以提高5倍。AHI是一种非常好的优化模式，其设计思想为数据库自优化，无需DBA进行人为的调整。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> <span class="keyword">ENGINE</span> <span class="keyword">INNODB</span> <span class="keyword">STATUS</span></span><br></pre></td></tr></table></figure>
-<p>通过此命令可以看到当前AHI的使用情况。</p>
-<p>注意哈希索引只能用来搜索等值的查询，比如：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> index_col=<span class="string">'XXX'</span></span><br></pre></td></tr></table></figure>
-<p>对于其他查找类型比如范围查找，不能使用范围索引，因此SHOW ENGINE INNODB STATUS结果中出现了non-hash searches/s的情况。AHI由InnoDB引擎控制，用户只能通过SHOW ENGINE INNODB STATUS的结果以及参数innodb_adaptive_hash_index来考虑是否启用此特性，默认情况下AHI是开启的。</p>
-<h3 id="两次写"><a href="#两次写" class="headerlink" title="两次写"></a>两次写</h3><p>Insert Buffer和AHI关注InnoDB性能上的提升，而doublewrite(两次写)带给InnoDB的是数据页的可靠性。发生数据库宕机时，InnoDB存储引擎可能正在写入某个页到表中，而这个页只写了一部分，比如说一个16kb的页，只写了前4kb，之后数据库就宕机了，这种情况叫做部分写失效(partial page write)。在InnoDB存储引擎中未使用doublewrite技术前，曾有因为部分写失效导致数据丢失的情况。</p>
-<p>doublewrite分为两部分，一部分是内存中的doublewrite buffer，大小2M，另一部分是磁盘上共享表空间的连续128个页，大小也是2M。对缓冲池脏页进行刷新时，先用memcpy函数将脏页复制到内存的doublewrite buffer，然后由doublewrite buffer再分为两次，每次1MB顺序写入共享表空间的物理磁盘上，然后马上调用fsync函数，同步磁盘。doublewrite页(共享表空间的页)是连续的，所以这是一个顺序的过程，并没有很大的开销。若操作系统在将页写入磁盘的过程中发生了崩溃，在恢复过程中，InnoDB存储引擎可以从共享表空间中的doublewrite中找到该页的一个副本，复制到表空间文件再应用重做日志。完成共享表空间相关的写入后，再将doublewrite buffer中的页写入各个表空间文件中，而此时的写入则是离散的，因为各个表空间可能在磁盘的不同位置。</p>
-<p>如果操作系统在将页写入磁盘的过程中发生了崩溃，恢复过程中，InnoDB可以从共享表空间中的doublewrite中找到该页的一个副本，将其复制到表空间文件，再应用重做日志。</p>
-<p>参数skip_innodb_doublewrite可以禁用doublewrite功能，可能导致前面提及的写失效问题，对于需要提供数据高可靠性的主服务器(master server)，任何时候都应该确保开启doublewrite功能。</p>
-<p><img src="/2019/01/09/InnoDB关键特性/1.JPG" alt=""></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
 
 
           </div>
           
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+      </div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -900,8 +507,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -945,6 +561,23 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#可重入锁ReentrantLock"><span class="nav-number">1.</span> <span class="nav-text">可重入锁ReentrantLock</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#可重入锁简单示例"><span class="nav-number">1.1.</span> <span class="nav-text">可重入锁简单示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可重入锁的中断处理"><span class="nav-number">1.2.</span> <span class="nav-text">可重入锁的中断处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可重入锁的申请等待限时"><span class="nav-number">1.3.</span> <span class="nav-text">可重入锁的申请等待限时</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#公平锁"><span class="nav-number">1.4.</span> <span class="nav-text">公平锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#整理ReentrantLock的几个重要方法"><span class="nav-number">1.5.</span> <span class="nav-text">整理ReentrantLock的几个重要方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#看看重入锁的实现"><span class="nav-number">1.6.</span> <span class="nav-text">看看重入锁的实现</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
@@ -1067,6 +700,10 @@
   
 
   
+  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
+<script src="/js/src/post-details.js?v=6.7.0"></script>
+
+
 
   
 
@@ -1076,6 +713,30 @@
 
 
   
+  
+    
+  <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+
+
+<script>
+  var disqus_config = function () {
+    this.page.url = "http://yoursite.com/2019/03/12/可重入锁ReentrantLock详解/";
+    this.page.identifier = "2019/03/12/可重入锁ReentrantLock详解/";
+    this.page.title = '可重入锁ReentrantLock详解';
+    };
+  function loadComments () {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', '' + +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  
+    loadComments();
+  
+</script>
+
+  
+
 
 
 
