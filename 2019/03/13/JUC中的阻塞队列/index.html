@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=6.7.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.7.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.7.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="JUC中的阻塞队列什么是阻塞队列阻塞队列(BlockingQueue)是一个支持两个附加操作的队列，两个附加的操作为：在队列为空时，获取元素的线程会等待队列变为非空。而当队列满时，存储元素的线程会等待队列可用。阻塞队列常用于生产者与消费者的场景，生产者是往队列中添加元素的线程，消费者是从队列中拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器中拿元素。 阻塞队列提供四种处理方法：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JUC中的阻塞队列">
+<meta property="og:url" content="http://yoursite.com/2019/03/13/JUC中的阻塞队列/index.html">
+<meta property="og:site_name" content="sleepyhead沉思录">
+<meta property="og:description" content="JUC中的阻塞队列什么是阻塞队列阻塞队列(BlockingQueue)是一个支持两个附加操作的队列，两个附加的操作为：在队列为空时，获取元素的线程会等待队列变为非空。而当队列满时，存储元素的线程会等待队列可用。阻塞队列常用于生产者与消费者的场景，生产者是往队列中添加元素的线程，消费者是从队列中拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器中拿元素。 阻塞队列提供四种处理方法：">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/03/13/JUC中的阻塞队列/C:/blog/source/_posts/JUC中的阻塞队列/1.JPG">
+<meta property="og:updated_time" content="2019-03-13T07:51:50.203Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JUC中的阻塞队列">
+<meta name="twitter:description" content="JUC中的阻塞队列什么是阻塞队列阻塞队列(BlockingQueue)是一个支持两个附加操作的队列，两个附加的操作为：在队列为空时，获取元素的线程会等待队列变为非空。而当队列满时，存储元素的线程会等待队列可用。阻塞队列常用于生产者与消费者的场景，生产者是往队列中添加元素的线程，消费者是从队列中拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器中拿元素。 阻塞队列提供四种处理方法：">
+<meta name="twitter:image" content="http://yoursite.com/2019/03/13/JUC中的阻塞队列/C:/blog/source/_posts/JUC中的阻塞队列/1.JPG">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/13/JUC中的阻塞队列/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>JUC中的阻塞队列 | sleepyhead沉思录</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">sleepyhead沉思录</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">无心插柳柳成荫</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archives"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/13/JUC中的阻塞队列/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JUC中的阻塞队列
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-13 12:37:03 / 修改时间：15:51:50" itemprop="dateCreated datePublished" datetime="2019-03-13T12:37:03+08:00">2019-03-13</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/13/JUC中的阻塞队列/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/13/JUC中的阻塞队列/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="JUC中的阻塞队列"><a href="#JUC中的阻塞队列" class="headerlink" title="JUC中的阻塞队列"></a>JUC中的阻塞队列</h1><h2 id="什么是阻塞队列"><a href="#什么是阻塞队列" class="headerlink" title="什么是阻塞队列"></a>什么是阻塞队列</h2><p>阻塞队列(BlockingQueue)是一个支持两个附加操作的队列，两个附加的操作为：<strong>在队列为空时，获取元素的线程会等待队列变为非空。而当队列满时，存储元素的线程会等待队列可用</strong>。阻塞队列常用于生产者与消费者的场景，生产者是往队列中添加元素的线程，消费者是从队列中拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器中拿元素。</p>
+<p>阻塞队列提供四种处理方法：</p>
+<p><img src="/2019/03/13/JUC中的阻塞队列/C:/blog\source\_posts\JUC中的阻塞队列\1.JPG" alt=""></p>
+<ul>
+<li>抛出异常：是指阻塞队列满时，再往队列里插入元素，会抛出IllegalStateException(“Queue full”)异常，当队列为空时，从队列里获取元素时会抛出NoSuchElementException异常。</li>
+<li>返回特殊值：插入方法会返回是否成功，成功则返回true。返回特殊值的移除方法：则是从队列中拿出一个元素，若是没有则返回null。</li>
+<li>一直阻塞：当阻塞队列满时，如果<strong>生产者线程</strong>往队列中put元素，队列会一直阻塞生产者线程，直到拿到数据，或者响应中断退出。当队列空时，<strong>消费者线程</strong>试图从队列中take元素，队列也会阻塞消费者线程直到队列可用。</li>
+<li>超时退出：当阻塞队列满时，队列会阻塞生产者线程一段时间，如果超过一定的时间，生产者线程就会退出。</li>
+</ul>
+<h2 id="阻塞队列解决的问题"><a href="#阻塞队列解决的问题" class="headerlink" title="阻塞队列解决的问题"></a>阻塞队列解决的问题</h2><p>如何进行多个线程中的数据共享呢，线程A希望给线程B发一个消息，什么方式告知B是最合理的呢。</p>
+<p>我们希望整个系统是松散耦合的，既希望线程A能够通知线程B，又希望线程A<strong>不知道</strong>线程B的存在。这样将来在进行重构或者升级时，完全可以不修改线程A，而直接把线程B升级为线程C，保证系统的平滑过渡，这里中间的”信箱”可以通过BlockingQueue来实现。BlockingQueue是一个接口而非一个具体的实现。</p>
+<h2 id="Java中的阻塞队列"><a href="#Java中的阻塞队列" class="headerlink" title="Java中的阻塞队列"></a>Java中的阻塞队列</h2><p>JDK7中提供了7个阻塞队列，分别是：</p>
+<ul>
+<li>ArrayBlockingQueue：一个由数组结构组成的<strong>有界阻塞队列</strong>。</li>
+<li>LinkedBlockingQueue：一个由链表结构组成的有界阻塞队列。</li>
+<li>PriorityBlockingQueue：一个支持优先级排序的无界阻塞队列。</li>
+<li>DelayQueue：一个使用优先级队列实现的无界阻塞队列。</li>
+<li>SynchronousQueue：一个不存储元素的阻塞队列。</li>
+<li>LinkedTransferQueue：一个由链表结构组成的无界阻塞队列。</li>
+<li>LinkedBlockingQueuef：一个由链表结构组成的双向阻塞队列。</li>
+</ul>
+<p>它们都是BlockingQueue具体的实现。</p>
+<h2 id="ArrayBlockingQueue"><a href="#ArrayBlockingQueue" class="headerlink" title="ArrayBlockingQueue"></a>ArrayBlockingQueue</h2><p>ArrayBlockingQueue是基于数组实现的，而LinkedBlockingQueue是基于链表实现的，BlockingQueue为什么适合作为数据共享的通道呢。其关键还是在Blocking上，Blocking是阻塞的意思，当消费者线程处理完队列中所有的信息后，如何知道下一条信息何时到来呢？BlockingQueue让服务线程在队列为空时进行等待，当有新的信息进入队列后，自动唤醒线程，下面以ArrayBlockingQueue为例来看看，ArrayBlockingQueue的内部元素放在一个对象数组中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//放置ArrayBlockingQueue对象的数组</span><br><span class="line">final Object[] items;</span><br></pre></td></tr></table></figure>
+<p>向队列中压入元素使用offer()或是put()方法，offer方法若是当前队列已满，会立即返回false，否则执行正常的入队操作。现在关注put()方法，put()方法也是将元素压入队列末尾。但如果队列满了，它会<strong>一直等待</strong>，直到队列中有空闲位置。</p>
+<p>而从队列中弹出元素可使用<strong>poll()</strong>与<strong>take()</strong>方法，它们都从队列的头部获得一个元素。不同之处在于，如果队列为空，poll()方法直接返回null，而take()方法会等待，直到队列中有可用元素。<strong>put()</strong>与<strong>take()</strong>方法是体现Blocking的关键，为做好等待与通知两件事，在ArrayBlockingQueue内部定义了如下字段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">final ReentrantLock lock;</span><br><span class="line">private final Condition notEmpty;</span><br><span class="line">private final Condition notFull;</span><br></pre></td></tr></table></figure>
+<p>执行take()操作时如果队列为空则让当前线程等待在notEmpty上，新元素入队时则进行notEmpty上的通知，下面展示take()的过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public E take() throws InterruptedException &#123;</span><br><span class="line">    final ReentrantLock lock = this.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    try &#123;</span><br><span class="line">       //要求当前线程进行等待，若是队列中有新元素时会得到通知</span><br><span class="line">        while (count == 0)</span><br><span class="line">           notEmpty.await();</span><br><span class="line">        return extract();   </span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>队列中有新元素时，线程会得到一个通知。下面是线程入队的一段代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private void insert(E x) &#123;</span><br><span class="line">    items[putIndex] = x;</span><br><span class="line">    putIndex = inc(putIndex);</span><br><span class="line">    ++count;</span><br><span class="line">    notEmpty.signal();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同理，对于put操作，队列满时，需要让生产者线程等待，源码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public void put(E e) throws InterruptedException &#123;</span><br><span class="line">    checkNotNull(e);</span><br><span class="line">    final ReentrantLock lock = this.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    try &#123;</span><br><span class="line">        while (count == items.length)</span><br><span class="line">            notFull.await();</span><br><span class="line">        insert(e);</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有元素从队列中被挪走，队列中出现空位时，也要通知等待入队的线程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private E extract() &#123;</span><br><span class="line">    final Object[] items = this.items;</span><br><span class="line">    E x = this.&lt;E&gt;cast(items[takeIndex]);</span><br><span class="line">    items[takeIndex] = null;</span><br><span class="line">    takeIndex = inc(takeIndex);</span><br><span class="line">    --count;</span><br><span class="line">    //用于通知的函数</span><br><span class="line">    notFull.signal();</span><br><span class="line">    return x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>BlockingQueue的使用非常普遍，在”生产者消费者’’相关博客中，还可以清楚的看到<strong>如何使用BlockingQueue</strong>解耦生产者和消费者。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/13/可重入锁的好搭档：Condition条件/" rel="next" title="可重入锁的好搭档：Condition条件">
+                <i class="fa fa-chevron-left"></i> 可重入锁的好搭档：Condition条件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">段铭</p>
+              <p class="site-description motion-element" itemprop="description">编程随想</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JUC中的阻塞队列"><span class="nav-number">1.</span> <span class="nav-text">JUC中的阻塞队列</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是阻塞队列"><span class="nav-number">1.1.</span> <span class="nav-text">什么是阻塞队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阻塞队列解决的问题"><span class="nav-number">1.2.</span> <span class="nav-text">阻塞队列解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java中的阻塞队列"><span class="nav-number">1.3.</span> <span class="nav-text">Java中的阻塞队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ArrayBlockingQueue"><span class="nav-number">1.4.</span> <span class="nav-text">ArrayBlockingQueue</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">段铭</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.7.0"></script>
+
+  <script src="/js/src/motion.js?v=6.7.0"></script>
+
+
+
+  
+  
+
+  
+  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
+<script src="/js/src/post-details.js?v=6.7.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
+
+
+
+  
+  
+    
+  <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+
+
+<script>
+  var disqus_config = function () {
+    this.page.url = "http://yoursite.com/2019/03/13/JUC中的阻塞队列/";
+    this.page.identifier = "2019/03/13/JUC中的阻塞队列/";
+    this.page.title = 'JUC中的阻塞队列';
+    };
+  function loadComments () {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', '' + +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  
+    loadComments();
+  
+</script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
