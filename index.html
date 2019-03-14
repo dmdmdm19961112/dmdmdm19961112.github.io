@@ -292,6 +292,175 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/14/线程安全的HashMap/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/03/14/线程安全的HashMap/" class="post-title-link" itemprop="url">线程安全的HashMap</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-14 14:33:26 / 修改时间：20:27:23" itemprop="dateCreated datePublished" datetime="2019-03-14T14:33:26+08:00">2019-03-14</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/14/线程安全的HashMap/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/14/线程安全的HashMap/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="线程安全的HashMap"><a href="#线程安全的HashMap" class="headerlink" title="线程安全的HashMap"></a>线程安全的HashMap</h1><p>在多线程环境中使用HashMap可能带来很多问题，若是需要一个线程安全的HashMap，我们应该怎么做？一种可行的方法是使用Collections.synchronizedMap()方法来包装我们的HashMap。以下代码产生的HashMap就是安全的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public static Map m = Collections.synchronizedMap(new HashMap());</span><br></pre></td></tr></table></figure>
+<p>Collections.synchronizedMap()会生成一个类名为<strong>SynchronizedMap</strong>的Map。它使用委托，将自己所有Map相关的功能交给传入的HashMap实现，SynchronizedMap自身则主要保证线程安全。</p>
+<p>SynchronizedMap具体参考下面的实现，首先SynchronizedMap内包装了一个Map:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//SynchronizedMap源码示例</span><br><span class="line">private static class SynchronizedMap&lt;K, V&gt; implements Map&lt;K, V&gt;, Serializable &#123;</span><br><span class="line">    private static final long serialVersionUID = 1978198479659022715L;</span><br><span class="line">    private final Map&lt;K, V&gt; m;</span><br><span class="line">    final Object mutex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过上面的mutex实现对这个m的互斥操作，比如对SynchronizedMap的get()方法，是这样实现的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public V get(Object key) &#123;</span><br><span class="line">    synchronized (mutex) &#123;</span><br><span class="line">        return m.get(key);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而其他所有相关的Map操作都会<strong>使用这个mutex进行同步</strong>，从而实现线程安全。</p>
+<p>这个包装的Map可以满足线程安全的要求，但是它在多线程环境下的表现是不好的，无论是对Map的读取或者写入，都需要获得mutex的锁，这会导致所有对Map的操作全部进入等待状态，直到mutex锁可用。如果并发级别不高，一般来说这种方案够用。但在高并发环境下，我们有必要寻找新的解决方案，一种更加专业的HashMap是<strong>ConcurrentHashMap</strong>，位于java.util.concurrent包中。它专门为并发进行了性能优化，更加适合多线程场合。</p>
+<h2 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h2><p>ConcurrentHashMap是一个高性能的HashMap，对一个HashMap来说，最重要的两个方法是get()和put()，一种最自然的想法是对HashMap加锁，但是这样做，我们认为<strong>加锁粒度太大</strong>，对于ConcurrentHashMap，它内部进一步分为了若干个小的HashMap，这些小的HashMap称为段，默认情况下，一个ConcurrentHashMap被进一步分为16个段。</p>
+<p>如果需要在ConcurrentHashMap中增加一个新的项，并不是将整个HashMap加锁，而是根据hashcode得到该表项应该存放到哪个段中，<strong>然后对该段加锁</strong>，并完成put()操作，在多线程环境中，若<strong>多个线程同时进行put()操作</strong>，只要被加入的表项不存放在同一个段中，线程间便可以做到真正的并行。ConcurrentHashMap默认有16个段，如果运气够好，ConcurrentHashMap可以同时接受16个线程同时插入(如果都插入不同的段中)，<strong>从而大大提高吞吐量</strong>，以下代码展示ConcurrentHashMap的put()过程，根据key获得对应段的序号，得到段并将数据插入给定段中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public V put(K key, V value) &#123;</span><br><span class="line">    Segment&lt;K, V&gt; s;</span><br><span class="line">    if (value == null)</span><br><span class="line">       throw new NullPointerException();</span><br><span class="line">    int hash = hash(key);</span><br><span class="line">    int j = (hash &gt;&gt;&gt; segmentShift) &amp; segmentMask;</span><br><span class="line">    if ((s = (Segment&lt;K, V&gt;)UNSAFE.getObject(segments, (j &lt;&lt; SSHIFT) + SBASE)) == null)</span><br><span class="line">    s = ensureSegment(j);</span><br><span class="line">    return s.put(key, hash, value, false);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>减少锁粒度有一个新的问题，系统需要取得全局锁时，其消耗的资源会比较多。仍以ConcurrentHashMap为例，虽然其put()方法很好的分离了锁，但试图访问ConcurrentHashMap全局信息时，就会需要同时取得所有段的锁才能顺利实施，<strong>比如ConcurrentHashMap</strong>的size()方法，将返回ConcurrentHashMap的有效表项的数量，要获取这个信息要取得所有子段的锁，因此，其size()方法的部分代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">//size()方法的部分代码</span><br><span class="line">sum = 0;</span><br><span class="line">//对所有的段加锁</span><br><span class="line">for (int i = 0; i &lt; segments.length; ++i)</span><br><span class="line">    segments[i].lock();</span><br><span class="line">//统计总数    </span><br><span class="line">for (int i = 0; i &lt; segments.length; ++i)</span><br><span class="line">    sum += segments[i].count;</span><br><span class="line">//释放所有的锁</span><br><span class="line">for (int i = 0; i &lt; segments.length; ++i)</span><br><span class="line">    segments[i].unlock();</span><br></pre></td></tr></table></figure>
+<p>在计算总数时，先要获得所有段的锁，然后再求和，但是ConcurrentHashMap的size()方法并不总是这样执行，事实上，size()会先使用无锁的方法求和，如果失败才会尝试这种加锁的方法，无论怎样，在高并发场合ConcurrentHashMap的性能依然要差于同步的HashMap。</p>
+<p><strong>因此，只有在类似于size()获取全局信息的方法调用不频繁时，这种减少锁粒度的方法才能真正提高系统吞吐量。</strong></p>
+<p><strong>注意：所谓减少锁粒度，就是指缩小锁定对象的范围，从而减少锁冲突的可能性，进而提高系统的并发能力。</strong></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1448,7 +1617,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
