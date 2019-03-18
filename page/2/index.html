@@ -96,26 +96,23 @@
 
 
 
-  <meta name="description" content="插入缓冲(Insert Buffer)以及它解决的问题 插入缓冲这个名字可能会让人以为插入缓冲是缓冲池的一个组成部分，其实不然，插入缓冲和数据页一样，都是物理页的一个组成部分，插入缓冲为解决非聚集索引的写性能问题（插入或更新）而设计。对非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在则直接插入；不在则先放入到一个Insert Buffer">
-<meta property="og:type" content="article">
-<meta property="og:title" content="InnoDB关键特性">
-<meta property="og:url" content="http://yoursite.com/2019/01/09/InnoDB关键特性/index.html">
+  <meta name="description" content="编程随想">
+<meta property="og:type" content="website">
+<meta property="og:title" content="sleepyhead沉思录">
+<meta property="og:url" content="http://yoursite.com/page/2/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
-<meta property="og:description" content="插入缓冲(Insert Buffer)以及它解决的问题 插入缓冲这个名字可能会让人以为插入缓冲是缓冲池的一个组成部分，其实不然，插入缓冲和数据页一样，都是物理页的一个组成部分，插入缓冲为解决非聚集索引的写性能问题（插入或更新）而设计。对非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在则直接插入；不在则先放入到一个Insert Buffer">
+<meta property="og:description" content="编程随想">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2019/01/09/InnoDB关键特性/1.JPG">
-<meta property="og:updated_time" content="2019-01-11T08:22:57.742Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="InnoDB关键特性">
-<meta name="twitter:description" content="插入缓冲(Insert Buffer)以及它解决的问题 插入缓冲这个名字可能会让人以为插入缓冲是缓冲池的一个组成部分，其实不然，插入缓冲和数据页一样，都是物理页的一个组成部分，插入缓冲为解决非聚集索引的写性能问题（插入或更新）而设计。对非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在则直接插入；不在则先放入到一个Insert Buffer">
-<meta name="twitter:image" content="http://yoursite.com/2019/01/09/InnoDB关键特性/1.JPG">
+<meta name="twitter:title" content="sleepyhead沉思录">
+<meta name="twitter:description" content="编程随想">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/01/09/InnoDB关键特性/">
+  <link rel="canonical" href="http://yoursite.com/page/2/">
 
 
 
@@ -125,7 +122,7 @@
   };
 </script>
 
-  <title>InnoDB关键特性 | sleepyhead沉思录</title>
+  <title>sleepyhead沉思录</title>
   
 
 
@@ -173,7 +170,8 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -277,9 +275,9 @@
           
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-expand">
+  <section id="posts" class="posts-expand">
     
+      
 
   
 
@@ -311,8 +309,10 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">InnoDB关键特性
-
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/01/09/InnoDB关键特性/" class="post-title-link" itemprop="url">InnoDB关键特性</a>
               
             
           </h1>
@@ -398,7 +398,9 @@
       
 
       
-        <h3 id="插入缓冲-Insert-Buffer-以及它解决的问题"><a href="#插入缓冲-Insert-Buffer-以及它解决的问题" class="headerlink" title="插入缓冲(Insert Buffer)以及它解决的问题"></a>插入缓冲(Insert Buffer)以及它解决的问题</h3><p> 插入缓冲这个名字可能会让人以为插入缓冲是缓冲池的一个组成部分，其实不然，插入缓冲和数据页一样，都是物理页的一个组成部分，插入缓冲为解决非聚集索引的写性能问题（插入或更新）而设计。对非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在则直接插入；不在则先放入到一个Insert Buffer对象中，此时起到了欺骗的效果，看似数据库这个非聚集索引已经插入到了叶子节点，然而并非如此，只是存放在另一个位置。然后再以一定的频率以及情况进行Insert Buffer同辅助索引页子节点的merge操作，此时通常能将多个插入合并到一个操作中，这就大大提高了<strong>非聚集索引插入的性能</strong>。</p>
+        
+          
+            <h3 id="插入缓冲-Insert-Buffer-以及它解决的问题"><a href="#插入缓冲-Insert-Buffer-以及它解决的问题" class="headerlink" title="插入缓冲(Insert Buffer)以及它解决的问题"></a>插入缓冲(Insert Buffer)以及它解决的问题</h3><p> 插入缓冲这个名字可能会让人以为插入缓冲是缓冲池的一个组成部分，其实不然，插入缓冲和数据页一样，都是物理页的一个组成部分，插入缓冲为解决非聚集索引的写性能问题（插入或更新）而设计。对非聚集索引的插入或更新操作，不是每一次都直接插入到索引页中，而是先判断插入的非聚集索引页是否在缓冲池中，若在则直接插入；不在则先放入到一个Insert Buffer对象中，此时起到了欺骗的效果，看似数据库这个非聚集索引已经插入到了叶子节点，然而并非如此，只是存放在另一个位置。然后再以一定的频率以及情况进行Insert Buffer同辅助索引页子节点的merge操作，此时通常能将多个插入合并到一个操作中，这就大大提高了<strong>非聚集索引插入的性能</strong>。</p>
 <p>Insert Buffer的使用要满足以下两个条件：</p>
 <ul>
 <li>索引是辅助索引</li>
@@ -429,6 +431,8 @@
 <p>参数skip_innodb_doublewrite可以禁用doublewrite功能，可能导致前面提及的写失效问题，对于需要提供数据高可靠性的主服务器(master server)，任何时候都应该确保开启doublewrite功能。</p>
 <p><img src="/2019/01/09/InnoDB关键特性/1.JPG" alt=""></p>
 
+          
+        
       
     </div>
 
@@ -451,28 +455,12 @@
       
 
       
-      
+
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/01/10/Mysql索引原理及使用/" rel="prev" title="Mysql InnoDB索引原理与使用">
-                Mysql InnoDB索引原理与使用 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
-
-      
+        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -482,22 +470,18 @@
   </article>
 
 
-  </div>
+    
+  </section>
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
 
 
           </div>
           
-
-  
-    <div class="comments" id="comments">
-      <div id="disqus_thread">
-        <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
-      </div>
-    </div>
-
-  
-
-
 
         </div>
         
@@ -518,17 +502,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <div class="site-overview-wrap sidebar-panel">
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -572,23 +547,6 @@
         </div>
       </div>
 
-      
-      <!--noindex-->
-        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-            
-            
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#插入缓冲-Insert-Buffer-以及它解决的问题"><span class="nav-number">1.</span> <span class="nav-text">插入缓冲(Insert Buffer)以及它解决的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自适应哈希索引"><span class="nav-number">2.</span> <span class="nav-text">自适应哈希索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两次写"><span class="nav-number">3.</span> <span class="nav-text">两次写</span></a></li></ol></div>
-            
-
-          </div>
-        </div>
-      <!--/noindex-->
       
 
       
@@ -711,10 +669,6 @@
   
 
   
-  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
-<script src="/js/src/post-details.js?v=6.7.0"></script>
-
-
 
   
 
@@ -724,30 +678,6 @@
 
 
   
-  
-    
-  <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
-
-
-<script>
-  var disqus_config = function () {
-    this.page.url = "http://yoursite.com/2019/01/09/InnoDB关键特性/";
-    this.page.identifier = "2019/01/09/InnoDB关键特性/";
-    this.page.title = 'InnoDB关键特性';
-    };
-  function loadComments () {
-    var d = document, s = d.createElement('script');
-    s.src = 'https://.disqus.com/embed.js';
-    s.setAttribute('data-timestamp', '' + +new Date());
-    (d.head || d.body).appendChild(s);
-  }
-  
-    loadComments();
-  
-</script>
-
-  
-
 
 
 
