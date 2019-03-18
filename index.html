@@ -292,6 +292,387 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/15/JUC线程池/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/03/15/JUC线程池/" class="post-title-link" itemprop="url">JUC线程池介绍</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-15 10:50:06" itemprop="dateCreated datePublished" datetime="2019-03-15T10:50:06+08:00">2019-03-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-18 12:10:17" itemprop="dateModified" datetime="2019-03-18T12:10:17+08:00">2019-03-18</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/15/JUC线程池/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/15/JUC线程池/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="JUC线程池介绍"><a href="#JUC线程池介绍" class="headerlink" title="JUC线程池介绍"></a>JUC线程池介绍</h1><p>多线程的软件设计方法确实可以最大限度发挥多核处理器的计算能力，从而提高生产系统的吞吐量和性能，但如果不加控制和管理的随意使用线程，对系统性能反倒有不利影响。一种简单的线程创建及回收的方法类如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">new Thread(new Runnable() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        //do sth.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
+<p>以上代码创建了一个线程，<strong>而且在run()方法结束后</strong>，自动回收该线程。在简单的应用系统中，这段代码没有太多问题，但在生产环境中，系统由于真实环境的需要，可能开启许多线程支撑其应用。而当线程数量过大时，反而会耗尽CPU和内存资源。与进程相比，线程是一种轻量级工具，但其创建和关闭都需要花费时间。若为每一个小的任务创建一个线程，可能出现创建和销毁线程所占用时间大于该线程真实工作所消耗时间的情况，反而会得不偿失。</p>
+<p>其次，线程本身也需要占用内存空间，大量线程抢占宝贵内存资源，若不恰当，可能会导致Out of Memory异常，即使没有，大量的线程回收也会给GC带来很大的压力，延长GC的停顿时间。</p>
+<p>对线程的使用必须掌握一个度，在有限的范围内，增加线程的数量可以明显提高系统吞吐量。但一旦超出这个范围，大量线程会拖垮应用系统，所以在生产环境中使用线程，需要对其进行控制与管理。（大量盲目创建线程是有害的）。</p>
+<h2 id="什么是线程池"><a href="#什么是线程池" class="headerlink" title="什么是线程池"></a>什么是线程池</h2><p>为了避免系统频繁地创建和销毁线程，我们可以让创建的线程进行复用。线程池是与数据库连接池相似的概念，线程池中总有几个活跃线程。当你需要使用线程时，可以从池子中随便拿一个空闲线程，完成线程时，不急于关闭线程，而是将线程返回线程池，方便其他人使用。</p>
+<p>简而言之，<strong>使用线程池后</strong>，创建线程成了从线程池获得空闲线程，关闭线程成了向线程池归还线程。</p>
+<h2 id="不要重复发明轮子：JDK对线程池的支持"><a href="#不要重复发明轮子：JDK对线程池的支持" class="headerlink" title="不要重复发明轮子：JDK对线程池的支持"></a>不要重复发明轮子：JDK对线程池的支持</h2><p>为更好控制多线程，JDK提供了一套Executor框架，从而帮助开发人员有效进行线程控制，其本质就是一个线程池。其中Executors扮演线程池工厂的角色，通过Executors可以取得一个特定功能的线程池，各种返回具有不同工作特性的线程池的工厂方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static ExecutorService newFixedThreadPool(int nThreads);</span><br><span class="line">public static ExecutorService newSingleThreadExecutor();</span><br><span class="line">public static ExecutorService newCachedThreadPool();</span><br><span class="line">public static ScheduledExecutorService newSingleThreadScheduledExecutor();</span><br><span class="line">public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize);</span><br></pre></td></tr></table></figure>
+<p>以上工厂方法分别返回具有不同工作特性的线程池，下面是这些线程池工厂方法的具体说明：</p>
+<ul>
+<li><p><strong>newFixedThreadPool()</strong>方法，该方法返回一个固定线程数量的线程池，该线程池中的线程数量<strong>始终不变</strong>。当有一个新的任务提交时，线程池中若有空闲线程，则立刻执行，<strong>若没有，则新的任务暂时存放在一个任务队列中</strong>，待有线程空闲时，便处理在任务队列中的任务。</p>
+</li>
+<li><p><strong>newSingleThreadExecutor()</strong>方法，该方法返回一个只有一个线程的线程池，若多余一个任务被提交到该线程池，任务会被保存到一个任务队列中，待线程空闲，<strong>按先入先出</strong>的顺序执行队列中的任务。</p>
+</li>
+<li><p><strong>newCachedThreadPool()</strong>方法，该方法返回一个可以根据实际情况调整线程数量的线程池。线程池的线程数量是不确定的，<strong>但若有空闲线程可以复用</strong>，则会优先使用可以复用的线程。若所有线程都在工作，又有新的任务提交，则会创建新的线程处理任务。<strong>所有线程在当前任务执行完毕后，将返回线程池进行复用</strong>。</p>
+</li>
+<li><p><strong>newSingleThreadScheduledExecutor()</strong>方法，该方法返回一个ScheduledExecutorService对象，线程池大小为1。ScheduledExecutorService接口在ExecutorService接口上扩展了在给定时间执行某任务的功能，比如在某个固定的延时后执行，或者周期性执行某任务。</p>
+</li>
+<li><p><strong>newScheduledThreadPool()</strong>方法，该方法也返回一个ScheduledExecutorService对象，但是该线程池可以指定线程数量。</p>
+</li>
+</ul>
+<h2 id="固定大小的线程池，newFixedThreadPool"><a href="#固定大小的线程池，newFixedThreadPool" class="headerlink" title="固定大小的线程池，newFixedThreadPool()"></a>固定大小的线程池，newFixedThreadPool()</h2><p>这里以newFixedThreadPool()为例展示线程池使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">package com.example.threadpool;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.ExecutorService;</span><br><span class="line">import java.util.concurrent.Executors;</span><br><span class="line"></span><br><span class="line">public class ThreadPoolDemo &#123;</span><br><span class="line"></span><br><span class="line">    public static class MyTask implements Runnable &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            System.out.println(System.currentTimeMillis() + &quot;:Thread ID:&quot; + Thread.currentThread().getId());</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(1000);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        MyTask task = new MyTask();</span><br><span class="line">        //创建固定线程数量为5的线程池。</span><br><span class="line">        ExecutorService es = Executors.newFixedThreadPool(5);</span><br><span class="line">        for (int i = 0; i &lt; 10; i++) &#123;</span><br><span class="line">            //依次向线程池提交十个任务，每个任务打印执行时间和这个线程的id</span><br><span class="line">            es.submit(task);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>提交这10个任务后线程池安排调度这10个任务，输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1552876322572:Thread ID:15</span><br><span class="line">1552876322573:Thread ID:16</span><br><span class="line">1552876322572:Thread ID:14</span><br><span class="line">1552876322572:Thread ID:13</span><br><span class="line">1552876322572:Thread ID:12</span><br><span class="line">1552876323574:Thread ID:12</span><br><span class="line">1552876323574:Thread ID:16</span><br><span class="line">1552876323574:Thread ID:14</span><br><span class="line">1552876323574:Thread ID:15</span><br><span class="line">1552876323574:Thread ID:13</span><br></pre></td></tr></table></figure>
+<p>可以发现前五个任务和后五个任务的执行时间正好相差一秒钟，而且前五个任务和后五个任务的ID是完全一致的（都是12,13,14,15,16）。说明在10个任务中，分为2批次进行，完全符合一个只有5个线程的线程池的行为。</p>
+<p>若是将线程池改造为newCachedThreadPool()，输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1552876594202:Thread ID:12</span><br><span class="line">1552876594203:Thread ID:15</span><br><span class="line">1552876594203:Thread ID:17</span><br><span class="line">1552876594202:Thread ID:13</span><br><span class="line">1552876594202:Thread ID:14</span><br><span class="line">1552876594203:Thread ID:18</span><br><span class="line">1552876594203:Thread ID:16</span><br><span class="line">1552876594203:Thread ID:19</span><br><span class="line">1552876594203:Thread ID:20</span><br><span class="line">1552876594203:Thread ID:21</span><br></pre></td></tr></table></figure>
+<p>符合可根据实际情况调整线程数量的线程池行为。</p>
+<h2 id="newScheduledThreadPool-—-计划任务"><a href="#newScheduledThreadPool-—-计划任务" class="headerlink" title="newScheduledThreadPool()—-计划任务"></a>newScheduledThreadPool()—-计划任务</h2><p>newScheduledThreadPool()返回一个ScheduledExecutorService对象，可以根据需要对线程进行调度，ScheduledExecutorService的一些主要方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public ScheduledFuture&lt;?&gt; schedule(Runnable command, long delay, TimeUnit unit);</span><br><span class="line">public ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit);</span><br><span class="line">public ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit);</span><br></pre></td></tr></table></figure>
+<p>同其他几个线程池不同，ScheduledExecutorService并不一定会立即安排执行任务，它起到计划任务的作用，在指定时间对任务进行调度。</p>
+<p>上面的schedule()在给定时间对任务进行一次调度，方法<strong>scheduleAtFixedRate()和scheduleWithFixedDelay()</strong>会对任务进行周期性调度，但这两种周期性调度间存在一点微小的区别。</p>
+<p>对于<strong>FixedRate</strong>方法来说，任务调度频率是一定的，以上一个任务执行时间为起点，之后的period时间，调度下一次任务，而<strong>FixDelay</strong>则是在上一个任务结束后，再经过delay时间进行任务调度。</p>
+<ul>
+<li>scheduleAtFixedRate：创建一个周期性任务，任务开始于给定的初始延时initialDelay，后续任务按给定周期进行，后续第一个任务将在initialDelay + period时执行，后续第二个任务将在initialDelay + 2*period时进行。</li>
+<li>scheduleWithFixedDelay：创建并执行一个周期性任务，任务开始于初始延时时间，后续任务将按照给定延时进行，即上一个任务的结束时间到下一个任务开始时间的时间差。</li>
+</ul>
+<p>下面使用<strong>scheduleAtFixedRate()</strong>调度一个任务，这个任务执行1秒时间，调度周期为两秒，即每两秒，任务执行一次。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">package com.example.threadpool;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.Executors;</span><br><span class="line">import java.util.concurrent.ScheduledExecutorService;</span><br><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line">public class ScheduledExecutorServiceDemo &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        ScheduledExecutorService ses = Executors.newScheduledThreadPool(10);</span><br><span class="line">        //调度周期为2s，每2s，任务就会被执行一次</span><br><span class="line">        ses.scheduleAtFixedRate(new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    Thread.sleep(1000);</span><br><span class="line">                    System.out.println(System.currentTimeMillis()/1000);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, 0, 2, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出的时间间隔为s，可以看到时间间隔为2s，下面是在我的机器上的输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1552881603</span><br><span class="line">1552881605</span><br><span class="line">1552881607</span><br><span class="line">1552881609</span><br><span class="line">1552881611</span><br><span class="line">1552881613</span><br><span class="line">1552881615</span><br><span class="line">1552881617</span><br><span class="line">1552881619</span><br><span class="line">1552881621</span><br><span class="line"></span><br><span class="line">Process finished with exit code -1</span><br></pre></td></tr></table></figure>
+<p>实际上，<strong>ScheduledExecutorService</strong>不会让任务<strong>堆叠出现</strong>，将sleep代码改为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Thread.sleep(8000)</span><br></pre></td></tr></table></figure>
+<p>再执行上述代码，发现任务执行周期变为8s，而不是两秒。</p>
+<p>另一个问题是，调度程序实际上不会保证任务无限期持续调用，若任务本身抛出异常，则后续所有执行都会被中断，因此若想让任务持续执行，异常处理很重要，否则可能看到调度器无疾而终。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/03/15/倒计时器：CountDownLatch/" class="post-title-link" itemprop="url">倒计时器：CountDownLatch</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-15 09:16:12" itemprop="dateCreated datePublished" datetime="2019-03-15T09:16:12+08:00">2019-03-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-18 12:25:52" itemprop="dateModified" datetime="2019-03-18T12:25:52+08:00">2019-03-18</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/15/倒计时器：CountDownLatch/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/15/倒计时器：CountDownLatch/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="倒计时器：CountDownLatch"><a href="#倒计时器：CountDownLatch" class="headerlink" title="倒计时器：CountDownLatch"></a>倒计时器：CountDownLatch</h1><p>CountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使<strong>点火线程等待所有检查线程全部完工后再执行</strong>。CountDownLatch构造函数接收一个整数作为参数，即当前这个计数器的计数个数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public CountDownLatch(int count)</span><br></pre></td></tr></table></figure>
+<p>下面这个简单的示例，演示了CountDownLatch的使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class CountDownLatchDemo implements Runnable &#123;</span><br><span class="line">    static final CountDownLatch end = new CountDownLatch(10);</span><br><span class="line">    static final CountDownLatchDemo demo = new CountDownLatchDemo();</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            //模拟检查任务</span><br><span class="line">            Thread.sleep(new Random().nextInt(10)*1000);</span><br><span class="line">            System.out.println(&quot;check complete&quot;);</span><br><span class="line">            end.countDown();</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        ExecutorService exec = Executors.newFixedThreadPool(10);</span><br><span class="line">        for (int i = 0; i &lt; 10; i++) &#123;</span><br><span class="line">            exec.submit(demo);</span><br><span class="line">        &#125;</span><br><span class="line">        //等待检查</span><br><span class="line">        end.await();</span><br><span class="line">        //发射火箭</span><br><span class="line">        System.out.println(&quot;Fire&quot;);</span><br><span class="line">        exec.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CountDownLatch计数数量为10表示需要有10个线程完成任务，等待在CountDownLatch上的线程才能继续执行，代码中的CountDownLatch.countdown()方法，是通知CountDownLatch，一个线程已经完成了任务，倒计时器可以减一了。接下来使用<strong>CountDownLatch.await()</strong>方法，要求主线程等待全部10个检查任务全部完成，待10个任务全部完成时，主线程才能继续执行。</p>
+<p><strong>主线程在CountDownLatch上等待</strong>，当所有检查任务全部完成后，主线程才能继续执行。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/14/ReadWriteLock读写锁/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -1779,7 +2160,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>

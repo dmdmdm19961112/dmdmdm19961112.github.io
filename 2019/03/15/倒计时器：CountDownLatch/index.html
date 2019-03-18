@@ -96,24 +96,24 @@
 
 
 
-  <meta name="description" content="高效读取：不变模式下的CopyOnWriteArrayList在许多应用场景中，读操作可能远远大于写操作。比如说，一些系统级别的信息，往往只需要加载或者修改很少的次数，但是会被系统中所有模块频繁的访问，对于这种场景，最好是读操作尽可能快，写操作慢一些都没事。 由于读操作根本不会修改原有的数据，对于每一次读取进行加锁是一种资源浪费。应该允许多个线程同时访问List的内部数据，毕竟读取操作是安全的，根">
+  <meta name="description" content="倒计时器：CountDownLatchCountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使点火线程等待所有检查线程全部完工后再执">
 <meta property="og:type" content="article">
-<meta property="og:title" content="高效读取：不变模式下的CopyOnWriteArrayList">
-<meta property="og:url" content="http://yoursite.com/2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/index.html">
+<meta property="og:title" content="倒计时器：CountDownLatch">
+<meta property="og:url" content="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
-<meta property="og:description" content="高效读取：不变模式下的CopyOnWriteArrayList在许多应用场景中，读操作可能远远大于写操作。比如说，一些系统级别的信息，往往只需要加载或者修改很少的次数，但是会被系统中所有模块频繁的访问，对于这种场景，最好是读操作尽可能快，写操作慢一些都没事。 由于读操作根本不会修改原有的数据，对于每一次读取进行加锁是一种资源浪费。应该允许多个线程同时访问List的内部数据，毕竟读取操作是安全的，根">
+<meta property="og:description" content="倒计时器：CountDownLatchCountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使点火线程等待所有检查线程全部完工后再执">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-14T03:22:02.288Z">
+<meta property="og:updated_time" content="2019-03-18T04:25:52.046Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="高效读取：不变模式下的CopyOnWriteArrayList">
-<meta name="twitter:description" content="高效读取：不变模式下的CopyOnWriteArrayList在许多应用场景中，读操作可能远远大于写操作。比如说，一些系统级别的信息，往往只需要加载或者修改很少的次数，但是会被系统中所有模块频繁的访问，对于这种场景，最好是读操作尽可能快，写操作慢一些都没事。 由于读操作根本不会修改原有的数据，对于每一次读取进行加锁是一种资源浪费。应该允许多个线程同时访问List的内部数据，毕竟读取操作是安全的，根">
+<meta name="twitter:title" content="倒计时器：CountDownLatch">
+<meta name="twitter:description" content="倒计时器：CountDownLatchCountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使点火线程等待所有检查线程全部完工后再执">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/">
+  <link rel="canonical" href="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/">
 
 
 
@@ -123,7 +123,7 @@
   };
 </script>
 
-  <title>高效读取：不变模式下的CopyOnWriteArrayList | sleepyhead沉思录</title>
+  <title>倒计时器：CountDownLatch | sleepyhead沉思录</title>
   
 
 
@@ -292,7 +292,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="段铭">
@@ -309,7 +309,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">高效读取：不变模式下的CopyOnWriteArrayList
+          <h1 class="post-title" itemprop="name headline">倒计时器：CountDownLatch
 
               
             
@@ -335,12 +335,24 @@
                 
               
 
-              <time title="创建时间：2019-03-14 10:25:07 / 修改时间：11:22:02" itemprop="dateCreated datePublished" datetime="2019-03-14T10:25:07+08:00">2019-03-14</time>
+              <time title="创建时间：2019-03-15 09:16:12" itemprop="dateCreated datePublished" datetime="2019-03-15T09:16:12+08:00">2019-03-15</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-18 12:25:52" itemprop="dateModified" datetime="2019-03-18T12:25:52+08:00">2019-03-18</time>
               
             
           </span>
@@ -354,9 +366,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/#comments" itemprop="discussionUrl">
+                <a href="/2019/03/15/倒计时器：CountDownLatch/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/15/倒计时器：CountDownLatch/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -384,14 +396,12 @@
       
 
       
-        <h1 id="高效读取：不变模式下的CopyOnWriteArrayList"><a href="#高效读取：不变模式下的CopyOnWriteArrayList" class="headerlink" title="高效读取：不变模式下的CopyOnWriteArrayList"></a>高效读取：不变模式下的CopyOnWriteArrayList</h1><p>在许多应用场景中，读操作可能远远大于写操作。比如说，一些系统级别的信息，往往只需要加载或者修改很少的次数，但是会被系统中所有模块频繁的访问，对于这种场景，最好是读操作尽可能快，写操作慢一些都没事。</p>
-<p>由于读操作根本不会修改原有的数据，对于每一次读取进行加锁是一种资源浪费。应该允许多个线程同时访问List的内部数据，毕竟读取操作是安全的，根据读写锁的思想，读锁与读锁间确实不发生冲突，但是读操作会受到写操作的阻碍，写操作发生时读操作就必须等待，否则可能读到不一致的数据。同理，读操作正在进行时，程序也不能进行写入。</p>
-<p><strong>为了将读取的性能发挥到极致</strong>，JDK中提供了CopyOnWriteArrayList类。对它来说，读取时完全不用加锁，而且更好的消息是：写入不会阻塞读取操作，只有写入与写入间要进行同步等待，这样一来，<strong>读操作</strong>的性能大幅提升。CopyOnWrite是在写入操作时进行一次自我复制，当这个list需要修改时，并不修改原来的内容，而是对原来的数据进行一次复制，将修改的内容写入副本中，写完之后再将修改完的副本替换原来的数据，<strong>这样就可以保证写操作不会影响读了</strong>，下面看看CopyOnWriteArrayList如何实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//有关读取的实现</span><br><span class="line">//注意这里的array变量是volatile类型</span><br><span class="line">private volatile transient Object[] array;</span><br><span class="line">public E get(int index) &#123;</span><br><span class="line">    return get(getArray(), index);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public Object[] getArray() &#123;</span><br><span class="line">    return array;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private E get(Object[] a, int index) &#123;</span><br><span class="line">    return (E) a[index];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>有关读取的实现中没有任何同步控制与锁操作，理由是内部数组array不会发生修改，只会被另外一个array替换，所以可以保证数据安全。</p>
-<p>但写入操作稍微显得有些麻烦：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">//这里的锁只用于控制写-写的情况</span><br><span class="line">public boolean add(E e) &#123;</span><br><span class="line">    final ReentrantLock lock = this.lock;</span><br><span class="line">    lock.lock();</span><br><span class="line">    try &#123;</span><br><span class="line">        Object[] elements = getArray();</span><br><span class="line">        int len = elements.length;</span><br><span class="line">        Object[] newElements = Arrays.copyOf(elements, len + 1);</span><br><span class="line">        newElements[len] = e;</span><br><span class="line">        setArray(newElements);</span><br><span class="line">        return true;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>写入操作使用锁，这个锁只限于控制写-写的情况，重点在Arrays.copyOf(elements, len + 1)，会生成一个新的数组，然后将新的元素加入新数组，随后用新的数组替换老的数组，整个过程不影响读取，而且修改完后，读取线程立刻可以察觉到这个修改(array变量是volatile类型)。</p>
+        <h1 id="倒计时器：CountDownLatch"><a href="#倒计时器：CountDownLatch" class="headerlink" title="倒计时器：CountDownLatch"></a>倒计时器：CountDownLatch</h1><p>CountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使<strong>点火线程等待所有检查线程全部完工后再执行</strong>。CountDownLatch构造函数接收一个整数作为参数，即当前这个计数器的计数个数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public CountDownLatch(int count)</span><br></pre></td></tr></table></figure>
+<p>下面这个简单的示例，演示了CountDownLatch的使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class CountDownLatchDemo implements Runnable &#123;</span><br><span class="line">    static final CountDownLatch end = new CountDownLatch(10);</span><br><span class="line">    static final CountDownLatchDemo demo = new CountDownLatchDemo();</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            //模拟检查任务</span><br><span class="line">            Thread.sleep(new Random().nextInt(10)*1000);</span><br><span class="line">            System.out.println(&quot;check complete&quot;);</span><br><span class="line">            end.countDown();</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        ExecutorService exec = Executors.newFixedThreadPool(10);</span><br><span class="line">        for (int i = 0; i &lt; 10; i++) &#123;</span><br><span class="line">            exec.submit(demo);</span><br><span class="line">        &#125;</span><br><span class="line">        //等待检查</span><br><span class="line">        end.await();</span><br><span class="line">        //发射火箭</span><br><span class="line">        System.out.println(&quot;Fire&quot;);</span><br><span class="line">        exec.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CountDownLatch计数数量为10表示需要有10个线程完成任务，等待在CountDownLatch上的线程才能继续执行，代码中的CountDownLatch.countdown()方法，是通知CountDownLatch，一个线程已经完成了任务，倒计时器可以减一了。接下来使用<strong>CountDownLatch.await()</strong>方法，要求主线程等待全部10个检查任务全部完成，待10个任务全部完成时，主线程才能继续执行。</p>
+<p><strong>主线程在CountDownLatch上等待</strong>，当所有检查任务全部完成后，主线程才能继续执行。</p>
 
       
     </div>
@@ -422,8 +432,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/13/JUC中的阻塞队列/" rel="next" title="JUC中的阻塞队列">
-                <i class="fa fa-chevron-left"></i> JUC中的阻塞队列
+              <a href="/2019/03/14/ReadWriteLock读写锁/" rel="next" title="ReadWriteLock读写锁">
+                <i class="fa fa-chevron-left"></i> ReadWriteLock读写锁
               </a>
             
           </div>
@@ -432,8 +442,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/03/14/线程安全的HashMap/" rel="prev" title="线程安全的HashMap">
-                线程安全的HashMap <i class="fa fa-chevron-right"></i>
+              <a href="/2019/03/15/JUC线程池/" rel="prev" title="JUC线程池介绍">
+                JUC线程池介绍 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -551,7 +561,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#高效读取：不变模式下的CopyOnWriteArrayList"><span class="nav-number">1.</span> <span class="nav-text">高效读取：不变模式下的CopyOnWriteArrayList</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#倒计时器：CountDownLatch"><span class="nav-number">1.</span> <span class="nav-text">倒计时器：CountDownLatch</span></a></li></ol></div>
             
 
           </div>
@@ -699,9 +709,9 @@
 
 <script>
   var disqus_config = function () {
-    this.page.url = "http://yoursite.com/2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/";
-    this.page.identifier = "2019/03/14/高效读取：不变模式下的CopyOnWriteArrayList/";
-    this.page.title = '高效读取：不变模式下的CopyOnWriteArrayList';
+    this.page.url = "http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/";
+    this.page.identifier = "2019/03/15/倒计时器：CountDownLatch/";
+    this.page.title = '倒计时器：CountDownLatch';
     };
   function loadComments () {
     var d = document, s = d.createElement('script');
