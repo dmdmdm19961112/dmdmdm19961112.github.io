@@ -98,14 +98,14 @@
 
   <meta name="description" content="JUC线程池内部实现（二）自定义线程创建：ThreadFactory线程池中的线程从何处来？线程池的主要作用就是线程复用，避免了线程的频繁创建，最开始的那些线程的来源就是ThreadFactory。 ThreadFactory是一个接口，这个接口只有一个方法，用来创建线程： 1Thread newThread(Runnable r); 当线程池需要新建线程时，就调用这个方法。 下面的案例使用自定义">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JUC线程池内部实现（二）">
+<meta property="og:title" content="sleepyhead沉思录">
 <meta property="og:url" content="http://yoursite.com/2019/03/08/JUC线程池内部实现（二）/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
 <meta property="og:description" content="JUC线程池内部实现（二）自定义线程创建：ThreadFactory线程池中的线程从何处来？线程池的主要作用就是线程复用，避免了线程的频繁创建，最开始的那些线程的来源就是ThreadFactory。 ThreadFactory是一个接口，这个接口只有一个方法，用来创建线程： 1Thread newThread(Runnable r); 当线程池需要新建线程时，就调用这个方法。 下面的案例使用自定义">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-18T12:50:12.265Z">
+<meta property="og:updated_time" content="2019-03-19T06:23:56.739Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="JUC线程池内部实现（二）">
+<meta name="twitter:title" content="sleepyhead沉思录">
 <meta name="twitter:description" content="JUC线程池内部实现（二）自定义线程创建：ThreadFactory线程池中的线程从何处来？线程池的主要作用就是线程复用，避免了线程的频繁创建，最开始的那些线程的来源就是ThreadFactory。 ThreadFactory是一个接口，这个接口只有一个方法，用来创建线程： 1Thread newThread(Runnable r); 当线程池需要新建线程时，就调用这个方法。 下面的案例使用自定义">
 
 
@@ -123,7 +123,7 @@
   };
 </script>
 
-  <title>JUC线程池内部实现（二） | sleepyhead沉思录</title>
+  <title> | sleepyhead沉思录</title>
   
 
 
@@ -309,7 +309,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">JUC线程池内部实现（二）
+          <h1 class="post-title" itemprop="name headline">
 
               
             
@@ -352,7 +352,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-18 20:50:12" itemprop="dateModified" datetime="2019-03-18T20:50:12+08:00">2019-03-18</time>
+                <time title="修改时间：2019-03-19 14:23:56" itemprop="dateModified" datetime="2019-03-19T14:23:56+08:00">2019-03-19</time>
               
             
           </span>
@@ -403,7 +403,18 @@
 <p>下面的案例使用<strong>自定义的ThreadFactory</strong>，一方面记录线程的创建，另一方面将所有的线程设置为守护线程，这样，当主线程退出后，将会强制销毁线程池。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">    MyTask task = new MyTask();</span><br><span class="line">    ExecutorService es = new ThreadPoolExecutor(5, 5,</span><br><span class="line">                                                0L, TimeUnit.MILLISECONDS,</span><br><span class="line">                                                new SynchronousQueue&lt;Runnable&gt;(),</span><br><span class="line">                                                new ThreadFactory() &#123;</span><br><span class="line">                                                    @Override</span><br><span class="line">                                                    public Thread newThread(Runnable r)                                                     &#123;</span><br><span class="line">                                                        Thread t = new Thread(r);</span><br><span class="line">                                                        t.setDaemon(true);</span><br><span class="line">                                                        System.out.println(t);</span><br><span class="line">                                                        return t;</span><br><span class="line">                                                    &#125;</span><br><span class="line">                                                &#125;);</span><br><span class="line">     for (int i = 0; i &lt; 5; i++)</span><br><span class="line">         es.submit(task);</span><br><span class="line">     Thread.sleep(2000);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这里使用自定义的ThreadFactory，可以更自由的设置池子中所有线程的状态，可以帮助我们做不少事情。</p>
-<h2 id="扩展线程池的手段"><a href="#扩展线程池的手段" class="headerlink" title="扩展线程池的手段"></a>扩展线程池的手段</h2>
+<h2 id="扩展线程池的手段"><a href="#扩展线程池的手段" class="headerlink" title="扩展线程池的手段"></a>扩展线程池的手段</h2><p>JDK已经帮我们实现了这个稳定的高性能线程池，但若我们需要对这个线程池进行一些扩展，比如我们想监控每个任务执行的开始与结束时间，或是一些其他的自定义增强功能，这时候应该怎么做？</p>
+<p>注意ThreadPoolExecutor是一个可以扩展的线程池，它提供了beforeExecute()，afterExecute()和terminated()三个接口对线程池进行控制。</p>
+<p>以beforeExecute()，afterExecute()为例，看看ThreadPoolExecutor.Worker.runTask()的源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">boolean ran = false;</span><br><span class="line">beforeExecute(thread, task);    //运行前</span><br><span class="line">try &#123;</span><br><span class="line">    task.run();                //运行任务</span><br><span class="line">    ran = true;</span><br><span class="line">    afterExecute(task, null);//运行结束后</span><br><span class="line">    ++completedTasks;</span><br><span class="line">&#125; catch (RuntimeException ex) &#123;</span><br><span class="line">    if (!ran)</span><br><span class="line">       afterExecute(task, ex);//运行结束</span><br><span class="line">    throw ex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在默认的ThreadPoolExecutor实现中，提供了空的beforeExecute()和afterExecute()实例，在实际应用中，可以对其进行扩展实现对线程池运行状态的跟踪，输出一些有用的调试信息帮助系统故障诊断，这对于多线程程序错误排查很有用。<strong>下面演示对线程池的扩展</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">package com.example.threadpool;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.ExecutorService;</span><br><span class="line">import java.util.concurrent.LinkedBlockingQueue;</span><br><span class="line">import java.util.concurrent.ThreadPoolExecutor;</span><br><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line">public class ExtThreadPool &#123;</span><br><span class="line"></span><br><span class="line">    public static class MyTask implements Runnable &#123;</span><br><span class="line">        public String name;</span><br><span class="line"></span><br><span class="line">        public MyTask(String name) &#123;</span><br><span class="line">            this.name = name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            System.out.println(&quot;正在执行&quot; + &quot;:Thread ID:&quot; + Thread.currentThread().getId() + &quot;,Task Name=&quot; + name);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(100);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        ExecutorService es = new ThreadPoolExecutor(5, 5, 0L, TimeUnit.MICROSECONDS,</span><br><span class="line">                new LinkedBlockingQueue&lt;Runnable&gt;()) &#123;</span><br><span class="line">            @Override</span><br><span class="line">            protected void beforeExecute(Thread t, Runnable r) &#123;</span><br><span class="line">                System.out.println(&quot;准备执行：&quot; + ((MyTask)r).name);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            protected void afterExecute(Runnable r, Throwable t) &#123;</span><br><span class="line">                System.out.println(&quot;执行完成：&quot; + ((MyTask)r).name);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            @Override</span><br><span class="line">            protected void terminated() &#123;</span><br><span class="line">                System.out.println(&quot;线程池退出&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        for (int i = 0; i &lt; 5; i++) &#123;</span><br><span class="line">            MyTask task = new MyTask(&quot;TASK-GEYM-&quot; + i);</span><br><span class="line">            //submit方法与execute方法的区别，前者返回一个Future对象，可通过这个线程来获得工作线程执行的结果</span><br><span class="line">            //还有另外一个不同，Runnable中的方法抛出异常时，execute会终止这个线程而submit不会</span><br><span class="line">            es.execute(task);</span><br><span class="line">            Thread.sleep(10);</span><br><span class="line">        &#125;</span><br><span class="line">        es.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里扩展了原来的线程池，实现了beforeExecute()，afterExecute()，terminiated()三个方法。三个方法分别用于记录一个任务的开始，结束和整个线程池的退出，这里使用execute()提交任务，之前一直用submit()提交，这两者的区别会在后续博客中详细介绍。</p>
+<p>提交完成后调用shutdown()方法关闭线程池，这是一个比较安全的方法，当前有线程在执行时，shutdown()方法不会立即暴力的终止所有任务，但会等待所有任务执行完成后再关闭线程池，可以理解为shutdown只是发送了一个关闭信号。shutdown()方法执行后，这个线程池就不能再接受新的任务了。</p>
+<p>代码输出实例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">准备执行：TASK-GEYM-0</span><br><span class="line">正在执行:Thread ID:12,Task Name=TASK-GEYM-0</span><br><span class="line">准备执行：TASK-GEYM-1</span><br><span class="line">正在执行:Thread ID:13,Task Name=TASK-GEYM-1</span><br><span class="line">准备执行：TASK-GEYM-2</span><br><span class="line">正在执行:Thread ID:14,Task Name=TASK-GEYM-2</span><br><span class="line">准备执行：TASK-GEYM-3</span><br><span class="line">正在执行:Thread ID:15,Task Name=TASK-GEYM-3</span><br><span class="line">准备执行：TASK-GEYM-4</span><br><span class="line">正在执行:Thread ID:16,Task Name=TASK-GEYM-4</span><br><span class="line">执行完成：TASK-GEYM-0</span><br><span class="line">执行完成：TASK-GEYM-1</span><br><span class="line">执行完成：TASK-GEYM-2</span><br><span class="line">执行完成：TASK-GEYM-3</span><br><span class="line">执行完成：TASK-GEYM-4</span><br><span class="line">线程池退出</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+<p>如上所示，所有任务的执行前，执行后的时间点以及任务的名字都已经可以捕获了，这对于程序的调试和诊断很有优势。</p>
+
       
     </div>
 
@@ -712,7 +723,7 @@
   var disqus_config = function () {
     this.page.url = "http://yoursite.com/2019/03/08/JUC线程池内部实现（二）/";
     this.page.identifier = "2019/03/08/JUC线程池内部实现（二）/";
-    this.page.title = 'JUC线程池内部实现（二）';
+    this.page.title = '';
     };
   function loadComments () {
     var d = document, s = d.createElement('script');
