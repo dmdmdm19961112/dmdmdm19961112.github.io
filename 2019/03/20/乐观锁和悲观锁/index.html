@@ -96,24 +96,24 @@
 
 
 
-  <meta name="description" content="倒计时器：CountDownLatchCountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使点火线程等待所有检查线程全部完工后再执">
+  <meta name="description" content="乐观锁和悲观锁人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="倒计时器：CountDownLatch">
-<meta property="og:url" content="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/index.html">
+<meta property="og:title" content="乐观锁和悲观锁">
+<meta property="og:url" content="http://yoursite.com/2019/03/20/乐观锁和悲观锁/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
-<meta property="og:description" content="倒计时器：CountDownLatchCountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使点火线程等待所有检查线程全部完工后再执">
+<meta property="og:description" content="乐观锁和悲观锁人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-18T04:25:52.046Z">
+<meta property="og:updated_time" content="2019-03-20T06:33:48.814Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="倒计时器：CountDownLatch">
-<meta name="twitter:description" content="倒计时器：CountDownLatchCountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使点火线程等待所有检查线程全部完工后再执">
+<meta name="twitter:title" content="乐观锁和悲观锁">
+<meta name="twitter:description" content="乐观锁和悲观锁人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/">
+  <link rel="canonical" href="http://yoursite.com/2019/03/20/乐观锁和悲观锁/">
 
 
 
@@ -123,7 +123,7 @@
   };
 </script>
 
-  <title>倒计时器：CountDownLatch | sleepyhead沉思录</title>
+  <title>乐观锁和悲观锁 | sleepyhead沉思录</title>
   
 
 
@@ -292,7 +292,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/20/乐观锁和悲观锁/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="段铭">
@@ -309,7 +309,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">倒计时器：CountDownLatch
+          <h1 class="post-title" itemprop="name headline">乐观锁和悲观锁
 
               
             
@@ -335,24 +335,12 @@
                 
               
 
-              <time title="创建时间：2019-03-15 09:16:12" itemprop="dateCreated datePublished" datetime="2019-03-15T09:16:12+08:00">2019-03-15</time>
+              <time title="创建时间：2019-03-20 14:27:35 / 修改时间：14:33:48" itemprop="dateCreated datePublished" datetime="2019-03-20T14:27:35+08:00">2019-03-20</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-03-18 12:25:52" itemprop="dateModified" datetime="2019-03-18T12:25:52+08:00">2019-03-18</time>
               
             
           </span>
@@ -366,9 +354,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/03/15/倒计时器：CountDownLatch/#comments" itemprop="discussionUrl">
+                <a href="/2019/03/20/乐观锁和悲观锁/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/15/倒计时器：CountDownLatch/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/20/乐观锁和悲观锁/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -396,12 +384,8 @@
       
 
       
-        <h1 id="倒计时器：CountDownLatch"><a href="#倒计时器：CountDownLatch" class="headerlink" title="倒计时器：CountDownLatch"></a>倒计时器：CountDownLatch</h1><p>CountDownLatch是一个非常有用的多线程控制工具类，这个工具通常用来控制线程等待，可以让某一个线程等待直到倒计时结束再开始执行。对于倒计时器，一种典型场景是火箭发射，火箭发射前，为确保万无一失，往往还要进行各项设备和仪器的检查，等所有的检查完成后，引擎才能点火。这种场景很适合使用CountDownLatch。它使<strong>点火线程等待所有检查线程全部完工后再执行</strong>。CountDownLatch构造函数接收一个整数作为参数，即当前这个计数器的计数个数。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public CountDownLatch(int count)</span><br></pre></td></tr></table></figure>
-<p>下面这个简单的示例，演示了CountDownLatch的使用。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class CountDownLatchDemo implements Runnable &#123;</span><br><span class="line">    static final CountDownLatch end = new CountDownLatch(10);</span><br><span class="line">    static final CountDownLatchDemo demo = new CountDownLatchDemo();</span><br><span class="line">    </span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            //模拟检查任务</span><br><span class="line">            Thread.sleep(new Random().nextInt(10)*1000);</span><br><span class="line">            System.out.println(&quot;check complete&quot;);</span><br><span class="line">            end.countDown();</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        ExecutorService exec = Executors.newFixedThreadPool(10);</span><br><span class="line">        for (int i = 0; i &lt; 10; i++) &#123;</span><br><span class="line">            exec.submit(demo);</span><br><span class="line">        &#125;</span><br><span class="line">        //等待检查</span><br><span class="line">        end.await();</span><br><span class="line">        //发射火箭</span><br><span class="line">        System.out.println(&quot;Fire&quot;);</span><br><span class="line">        exec.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>CountDownLatch计数数量为10表示需要有10个线程完成任务，等待在CountDownLatch上的线程才能继续执行，代码中的CountDownLatch.countdown()方法，是通知CountDownLatch，一个线程已经完成了任务，倒计时器可以减一了。接下来使用<strong>CountDownLatch.await()</strong>方法，要求主线程等待全部10个检查任务全部完成，待10个任务全部完成时，主线程才能继续执行。</p>
-<p><strong>主线程在CountDownLatch上等待</strong>，当所有检查任务全部完成后，主线程才能继续执行。</p>
+        <h1 id="乐观锁和悲观锁"><a href="#乐观锁和悲观锁" class="headerlink" title="乐观锁和悲观锁"></a>乐观锁和悲观锁</h1><p>人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。</p>
+<p>对并发控制而言，</p>
 
       
     </div>
@@ -432,8 +416,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/11/覆盖equals时总要g覆盖hashcode/" rel="next" title="覆盖equals时总要覆盖hashcode">
-                <i class="fa fa-chevron-left"></i> 覆盖equals时总要覆盖hashcode
+              <a href="/2019/03/15/倒计时器：CountDownLatch/" rel="next" title="倒计时器：CountDownLatch">
+                <i class="fa fa-chevron-left"></i> 倒计时器：CountDownLatch
               </a>
             
           </div>
@@ -441,10 +425,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/03/20/乐观锁和悲观锁/" rel="prev" title="乐观锁和悲观锁">
-                乐观锁和悲观锁 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -561,7 +541,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#倒计时器：CountDownLatch"><span class="nav-number">1.</span> <span class="nav-text">倒计时器：CountDownLatch</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#乐观锁和悲观锁"><span class="nav-number">1.</span> <span class="nav-text">乐观锁和悲观锁</span></a></li></ol></div>
             
 
           </div>
@@ -709,9 +689,9 @@
 
 <script>
   var disqus_config = function () {
-    this.page.url = "http://yoursite.com/2019/03/15/倒计时器：CountDownLatch/";
-    this.page.identifier = "2019/03/15/倒计时器：CountDownLatch/";
-    this.page.title = '倒计时器：CountDownLatch';
+    this.page.url = "http://yoursite.com/2019/03/20/乐观锁和悲观锁/";
+    this.page.identifier = "2019/03/20/乐观锁和悲观锁/";
+    this.page.title = '乐观锁和悲观锁';
     };
   function loadComments () {
     var d = document, s = d.createElement('script');

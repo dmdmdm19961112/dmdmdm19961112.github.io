@@ -292,6 +292,374 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/25/可重入锁ReentrantLock详解/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/02/25/可重入锁ReentrantLock详解/" class="post-title-link" itemprop="url">可重入锁ReentrantLock详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-25 21:57:00" itemprop="dateCreated datePublished" datetime="2019-02-25T21:57:00+08:00">2019-02-25</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-18 18:57:06" itemprop="dateModified" datetime="2019-03-18T18:57:06+08:00">2019-03-18</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/25/可重入锁ReentrantLock详解/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/02/25/可重入锁ReentrantLock详解/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="可重入锁ReentrantLock"><a href="#可重入锁ReentrantLock" class="headerlink" title="可重入锁ReentrantLock"></a>可重入锁ReentrantLock</h1><h2 id="可重入锁简单示例"><a href="#可重入锁简单示例" class="headerlink" title="可重入锁简单示例"></a>可重入锁简单示例</h2><p>可重入锁可以完全替代synchronized关键字，JDK5.0早期版本中可重入锁性能远远好于synchronized，而从JDK6.0开始，JDK在synchronized上进行了大量的优化，<strong>现在两者的性能差别并不大</strong> 。</p>
+<p>重入锁使用<strong>java.util.concurrent.locks.ReentrantLock</strong>类来实现，下面是一段简单的重入锁使用案例。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">package com.example.reentrantLock;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">//可重入锁的简单应用</span><br><span class="line">public class ReenterLock implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    public static int i = 0;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        for (int j = 0; j &lt; 10000000; j++) &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            //可重入锁是可以反复进入的</span><br><span class="line">            //lock.lock();</span><br><span class="line">            try &#123;</span><br><span class="line">                i++;</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">                //lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        ReenterLock tl = new ReenterLock();</span><br><span class="line">        //启动线程的方法之一</span><br><span class="line">        Thread t1 = new Thread(tl);</span><br><span class="line">        Thread t2 = new Thread(tl);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        //join方法会抛出InterruptedException异常，join()方法会阻塞当前线程直至目标线程执行完毕</span><br><span class="line">        t1.join();</span><br><span class="line">        t2.join();</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可重入锁是可以反复进入的，但这里的反复仅局限于一个线程，<strong>一个线程连续两次获得同一把锁，是允许的 </strong>，但需要注意，若一个线程多次获得锁，释放锁时也必须释放相同次数，如果释放锁的次数多了，会得到IllegalMonitorStateException异常，若释放锁的次数少了，相当于线程还持有这个锁，此时，其他线程也无法进入临界区。可重入锁还有一些高级功能，比如提供<strong>中断处理</strong>的能力：</p>
+<h2 id="可重入锁的中断处理"><a href="#可重入锁的中断处理" class="headerlink" title="可重入锁的中断处理"></a>可重入锁的中断处理</h2><p>中断处理提供一套机制，如果一个线程正在等待锁，能够收到一个通知，被告知不用再等待，可以停止工作了，这种情况对于处理死锁是很有帮助的。<strong>下面的代码产生了一个死锁，但由于锁中断，可以轻易解决这个问题</strong>，可重入锁的中断响应是<strong>解决死锁问题</strong>的一个有效手段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">package com.example.reentrantLock;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">public class IntLock implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock1 = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock2 = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    int lock;</span><br><span class="line"></span><br><span class="line">    //控制加锁顺序，方便构造死锁</span><br><span class="line">    public IntLock(int lock) &#123;</span><br><span class="line">        this.lock = lock;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            if (lock == 1) &#123;</span><br><span class="line">                //lockInterruptibly()方法也会抛出异常</span><br><span class="line">                lock1.lockInterruptibly();</span><br><span class="line">                try &#123;</span><br><span class="line">                    Thread.sleep(500);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;&#125;</span><br><span class="line">                lock2.lockInterruptibly();</span><br><span class="line"></span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                lock2.lockInterruptibly();</span><br><span class="line">                try &#123;</span><br><span class="line">                    Thread.sleep(500);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;&#125;</span><br><span class="line">                lock1.lockInterruptibly();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            System.out.println(Thread.currentThread().getId() + &quot;:线程抛出异常 lock=&quot; + lock);</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            if (lock1.isHeldByCurrentThread())</span><br><span class="line">                lock1.unlock();</span><br><span class="line">            if (lock2.isHeldByCurrentThread())</span><br><span class="line">                lock2.unlock();</span><br><span class="line">            System.out.println(Thread.currentThread().getId() + &quot;:线程退出&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        IntLock r1 = new IntLock(1);</span><br><span class="line">        IntLock r2 = new IntLock(2);</span><br><span class="line">        Thread t1 = new Thread(r1);</span><br><span class="line">        Thread t2 = new Thread(r2);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        Thread.sleep(1000);</span><br><span class="line"></span><br><span class="line">        //这里中断其中一个线程，而lockInterruptibly是一个可以对中断进行相应的锁申请动作，在等待锁的过程中响应中断</span><br><span class="line">        t2.interrupt();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面是对应的输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">java.lang.InterruptedException</span><br><span class="line">13:线程抛出异常 lock=2</span><br><span class="line">	at java.util.concurrent.locks.AbstractQueuedSynchronizer.doAcquireInterruptibly(AbstractQueuedSynchronizer.java:898)</span><br><span class="line">13:线程退出</span><br><span class="line">12:线程退出</span><br><span class="line">	at java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireInterruptibly(AbstractQueuedSynchronizer.java:1222)</span><br><span class="line">	at java.util.concurrent.locks.ReentrantLock.lockInterruptibly(ReentrantLock.java:335)</span><br><span class="line">	at com.example.reentrantLock.IntLock.run(IntLock.java:34)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:748)</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+<h2 id="可重入锁的申请等待限时"><a href="#可重入锁的申请等待限时" class="headerlink" title="可重入锁的申请等待限时"></a>可重入锁的申请等待限时</h2><p>通常无法判断一个线程为什么迟迟拿不到锁，可能是因为饥饿，可能是由于死锁了，给定一个等待时间，<strong>让线程自动放弃</strong>，这个行为是很有意义的，用ReentrantLock.tryLock()方法进行一次限时的等待，下面展示限时等待锁的简单使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">package com.example.reentrantLock;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">//展示不带参数的ReentrantLock.tryLock()的使用</span><br><span class="line">//避免死锁的另一种方法</span><br><span class="line">public class TryLock implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock1 = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock2 = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    int lock;</span><br><span class="line"></span><br><span class="line">    public TryLock(int lock) &#123;</span><br><span class="line">        this.lock = lock;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        if (lock == 1) &#123;</span><br><span class="line">            //tryLock()不带参数直接运行时，当前线程尝试获得锁，锁未被其他线程占用则申请锁成功，返回true，否则返回false，这种模式不会引起线程等待</span><br><span class="line">            while (true) &#123;</span><br><span class="line">                if (lock1.tryLock()) &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        try &#123;</span><br><span class="line">                            Thread.sleep(500);</span><br><span class="line">                        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                        &#125;</span><br><span class="line">                        if (lock2.tryLock()) &#123;</span><br><span class="line">                            try &#123;</span><br><span class="line">                                System.out.println(Thread.currentThread().getId() + &quot;:My Job done&quot;);</span><br><span class="line">                                return;</span><br><span class="line">                            &#125; finally &#123;</span><br><span class="line">                                lock2.unlock();</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; finally &#123;</span><br><span class="line">                        lock1.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            while (true) &#123;</span><br><span class="line">                if (lock2.tryLock()) &#123;</span><br><span class="line">                    try &#123;</span><br><span class="line">                        try &#123;</span><br><span class="line">                            Thread.sleep(500);</span><br><span class="line">                        &#125; catch (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">                        &#125;</span><br><span class="line">                        if (lock1.tryLock()) &#123;</span><br><span class="line">                            try &#123;</span><br><span class="line">                                System.out.println(Thread.currentThread().getId() + &quot;:My Job done!&quot;);</span><br><span class="line">                                return;</span><br><span class="line">                            &#125; finally &#123;</span><br><span class="line">                                lock1.unlock();</span><br><span class="line">                            &#125;</span><br><span class="line"></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; finally &#123;</span><br><span class="line">                        lock2.unlock();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        TryLock r1 = new TryLock(1);</span><br><span class="line">        TryLock r2 = new TryLock(2);</span><br><span class="line">        Thread t1 = new Thread(r1);</span><br><span class="line">        Thread t2 = new Thread(r2);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">12:My Job done</span><br><span class="line">13:My Job done!</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+<p>上述代码采用很容易死锁的加锁顺序，就是先让t1获得lock1，再让t2获得lock2，接着做反向请求，让t1申请lock2，t2申请lock1。在一般情况下，这会导致t1与t2相互等待，从而引起死锁。使用tryLock()后情况大大改善，执行足够长的时间，线程总会得到想要的资源，最后正常执行。</p>
+<h2 id="公平锁"><a href="#公平锁" class="headerlink" title="公平锁"></a>公平锁</h2><p>多数情况下，锁的申请是非公平的，线程1首先请求锁A，接着线程2也请求了锁A，当锁A可用时，是线程1可以获得锁还是线程2可以获得锁呢。这是不一定的，系统从这个锁的等待队列中随机挑选一个，不能保证其公平性，而公平的锁则不会这样，会按照时间的先后顺序保证先到者先得，后到者后得，若用synchronized关键字进行锁控制，产生的锁就是非公平的，而重入锁允许我们对公平性进行设置。有一个如下的构造函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public ReentrantLock(boolean fair)</span><br></pre></td></tr></table></figure>
+<p>参数fair为true时，表示锁是公平的，公平锁看起来很优美，但是要实现公平锁必然要求系统维护一个有序队列，因此公平锁实现成本较高，性能也相对较低，所以默认情况下锁是非公平的。如果没有特殊的需求，也不需要实现公平锁。非公平锁和公平锁在线程调度表现上也是非常不一样的。可以看到下面的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">package com.example.reentrantLock;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">public class FairLock implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    //这里指定锁是公平的</span><br><span class="line">    public static ReentrantLock fairLock = new ReentrantLock(true);</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        while (true) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                fairLock.lock();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + &quot;获得锁&quot;);</span><br><span class="line">            &#125; finally &#123;</span><br><span class="line">                fairLock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line"></span><br><span class="line">        FairLock r1 = new FairLock();</span><br><span class="line">        Thread t1 = new Thread(r1, &quot;Thread_t1&quot;);</span><br><span class="line">        Thread t2 = new Thread(r1, &quot;Thread_t2&quot;);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t1获得锁</span><br></pre></td></tr></table></figure>
+<p>输出中可以看到两个线程基本上是交替获得锁的，几乎不会发生同一个线程连续多次获得锁的可能，不使用公平锁时情况会完全不一样，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br><span class="line">Thread_t2获得锁</span><br></pre></td></tr></table></figure>
+<p>可以看到根据系统的调度，一个线程会倾向于再次获取已经持有的锁，这种分配方式是高效的，但是没有公平性可言。</p>
+<h2 id="整理ReentrantLock的几个重要方法"><a href="#整理ReentrantLock的几个重要方法" class="headerlink" title="整理ReentrantLock的几个重要方法"></a>整理ReentrantLock的几个重要方法</h2><ul>
+<li>lock()，获得锁，若是锁已经被占用，则等待，若是同一个线程多次lock()，是可行的</li>
+<li>lockInterruptibly()，获得锁，但是优先响应中断</li>
+<li>tryLock()，尝试获得锁，如果成功返回true，失败返回false，该方法不等待，立即返回</li>
+<li>tryLock(long time, TimeUnit unit)，在给定时间内尝试获得锁</li>
+<li>unlock()，释放锁，以上几个获取锁的方式都是用unlock()释放锁</li>
+</ul>
+<h2 id="看看重入锁的实现"><a href="#看看重入锁的实现" class="headerlink" title="看看重入锁的实现"></a>看看重入锁的实现</h2><ul>
+<li>原子状态，原子状态使用CAS操作来存储当前锁的状态，判断锁是否被别的线程拥有</li>
+<li>等待队列，所有没有请求到锁的线程，会进入等待队列进行等待，待有线程释放锁后，系统就能从等待队列中唤醒一个线程，继续工作</li>
+<li>阻塞原语park()与unpark()，用来挂起和恢复线程。没有得到锁的线程将被挂起。</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/18/可重入锁的好搭档：Condition条件/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/02/18/可重入锁的好搭档：Condition条件/" class="post-title-link" itemprop="url">可重入锁的好搭档：Condition条件</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-18 10:54:21" itemprop="dateCreated datePublished" datetime="2019-02-18T10:54:21+08:00">2019-02-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-18 18:57:50" itemprop="dateModified" datetime="2019-03-18T18:57:50+08:00">2019-03-18</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/18/可重入锁的好搭档：Condition条件/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/02/18/可重入锁的好搭档：Condition条件/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="可重入锁相关：Condition条件"><a href="#可重入锁相关：Condition条件" class="headerlink" title="可重入锁相关：Condition条件"></a>可重入锁相关：Condition条件</h1><p>Condition对象与<strong>wait()</strong>及<strong>notify()</strong>方法的作用大致是相同的，但是wait()与notify()方法是与synchronized关键字合作使用的，而Condition是与可重入锁相关联的，利用ReentrantLock实现的Lock接口的Condition newCondition()方法可以生成一个与当前重入锁绑定的Condition实例，利用Condition对象，可以让线程在合适的时候等待，或是在某一个特定时间得到通知，继续执行。以下是Condition接口提供的基本方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">void await() throws InterruptedException;</span><br><span class="line">void awaitUninterruptibly();</span><br><span class="line">long awaitNanos(long nanosTimeout) throws InterruptedException;</span><br><span class="line">boolean await(long time, TimeUnit unit) throws InterruptedException;</span><br><span class="line">boolean awaitUntil(Date deadline) throws InterruptedException;</span><br><span class="line">void signal();</span><br><span class="line">void signalAll();</span><br></pre></td></tr></table></figure>
+<p>Condition接口提供的await()方法会使当前线程等待，同时释放当前锁，而当其他线程使用signal()或是signalAll()方法时，线程会重新获得锁并继续执行。或者当线程被中断时也能跳出等待。这与Object.wait()方法很相似。而awaitUninterruptibly()方法与await()方法相似，但是并不会在等待过程中被中断。signal()方法唤醒一个在等待中的线程，signalAll()方法唤醒所有在等待过程中的线程，这与Object.notify()方法相似。下面是展示Condition功能的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">package com.example.reentrantLock;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.Condition;</span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">public class ReenterLockCondition implements Runnable &#123;</span><br><span class="line"></span><br><span class="line">    public static ReentrantLock lock = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    public static Condition condition = lock.newCondition();</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot;线程在等待&quot;);</span><br><span class="line">            condition.await();</span><br><span class="line">            System.out.println(&quot;Thread is going on&quot;);</span><br><span class="line">        &#125; catch (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line"></span><br><span class="line">        ReenterLockCondition tl = new ReenterLockCondition();</span><br><span class="line">        Thread t1 = new Thread(tl);</span><br><span class="line">        t1.start();</span><br><span class="line">        Thread.sleep(2000);</span><br><span class="line">        //通知线程t1继续执行</span><br><span class="line">        lock.lock();</span><br><span class="line">        condition.signal();</span><br><span class="line">        //线程使用Condition.await()和Condition.signal()时都要求持有相关的重入锁，signal方法调用后一般需要释放相关的锁，谦让给被唤醒的线程</span><br><span class="line">        //signal()唤醒的线程会重新试图获取与其绑定的重入锁，一旦成功获取，就可以继续执行了</span><br><span class="line">        lock.unlock();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="JDK中有关可重入锁与Condition对象的使用"><a href="#JDK中有关可重入锁与Condition对象的使用" class="headerlink" title="JDK中有关可重入锁与Condition对象的使用"></a>JDK中有关可重入锁与Condition对象的使用</h2><p>以ArrayBlockingQueue为例，其put方法实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">//ArrayBlockingQueue中的一些定义</span><br><span class="line">private final ReentrantLock lock;</span><br><span class="line">private final Condition notEmpty;</span><br><span class="line">private final Condition notFull;</span><br><span class="line">lock = new ReentrantLock(fair);</span><br><span class="line">//生成两个与lock绑定的Condition</span><br><span class="line">notEmpty = lock.newCondition();</span><br><span class="line">notFull = lock.newCondition();</span><br><span class="line"></span><br><span class="line">//put方法的实现</span><br><span class="line">public void put(E e) throws InterruptedException &#123;</span><br><span class="line">    if (e == null)</span><br><span class="line">    throw new NullPointerException();</span><br><span class="line">    final E[] items = this.items;</span><br><span class="line">    final ReentrantLock lock = this.lock;</span><br><span class="line">    //可以响应中断</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    try &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">        //如果当前队列已满，需要等待队列有足够的空间</span><br><span class="line">            while (count == items.length)</span><br><span class="line">               notFull.await();</span><br><span class="line">        &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            notFull.signal();</span><br><span class="line">            throw ie;</span><br><span class="line">        &#125;</span><br><span class="line">        insert(e);</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//insert方法</span><br><span class="line">private void insert(E x) &#123;</span><br><span class="line">    items[putIndex] = x;</span><br><span class="line">    putIndex = inc(putIndex);</span><br><span class="line">    ++count;</span><br><span class="line">    //通知需要take()的线程，队列已有数据</span><br><span class="line">    notEmpty.signal();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//与put方法相对应的take方法实现如下</span><br><span class="line">public E take() throws InterruptedException &#123;</span><br><span class="line">    final ReentrantLock lock = this.lock;</span><br><span class="line">    //对take()方法进行同步</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    try &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            //队列为空时，消费者队列需要一个非空的信号</span><br><span class="line">            while (count == 0)</span><br><span class="line">                notEmpty.await();</span><br><span class="line">        &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            notEmpty.signal();</span><br><span class="line">            throw ie;</span><br><span class="line">        &#125;</span><br><span class="line">        E x = extract();</span><br><span class="line">        return x;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private E extract() &#123;</span><br><span class="line">    final E[] items = this.items;</span><br><span class="line">    E x = items[takeIndex];</span><br><span class="line">    items[takeIndex] = null;</span><br><span class="line">    takeIndex = inc(takeIndex);</span><br><span class="line">    --count;</span><br><span class="line">    //通知put()线程队列已有空闲空间</span><br><span class="line">    notFull.signal();</span><br><span class="line">    return x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ArrayBlockingQueue是一个用数组实现的线程安全的有界的阻塞队列，阻塞队列是指多线程访问竞争资源时，当竞争资源都被某线程获取时，其他要获取该资源的线程需要阻塞等待。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/14/ReadWriteLock读写锁/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -410,6 +778,192 @@
 <p>若在系统中，<strong>读操作次数远远大于写操作次数，则读写锁可以发挥最大功效，提升系统的性能</strong>，下面是读写锁对性能的帮助：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">package com.example.readwritelock;</span><br><span class="line"></span><br><span class="line">import java.util.Random;</span><br><span class="line">import java.util.concurrent.locks.Lock;</span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line">import java.util.concurrent.locks.ReentrantReadWriteLock;</span><br><span class="line"></span><br><span class="line">public class ReadWriteLockDemo &#123;</span><br><span class="line"></span><br><span class="line">    private static Lock lock = new ReentrantLock();</span><br><span class="line"></span><br><span class="line">    private static ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();</span><br><span class="line"></span><br><span class="line">    private static Lock readLock = readWriteLock.readLock();</span><br><span class="line"></span><br><span class="line">    private static Lock writeLock = readWriteLock.writeLock();</span><br><span class="line"></span><br><span class="line">    private int value;</span><br><span class="line"></span><br><span class="line">    public Object handleRead(Lock lock) throws InterruptedException &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            //模拟读操作，读操作耗时越多，读写锁优势越明显</span><br><span class="line">            lock.lock();</span><br><span class="line">            Thread.sleep(1000);</span><br><span class="line">            return value;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void handleWrite(Lock lock, int index) throws InterruptedException &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            //模拟写操作</span><br><span class="line">            Thread.sleep(1000);</span><br><span class="line">            value = index;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final ReadWriteLockDemo demo = new ReadWriteLockDemo();</span><br><span class="line">        Runnable readRunnale = new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    //demo.handleRead(readLock);</span><br><span class="line">                    demo.handleRead(lock);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        Runnable writeRunnale = new Runnable() &#123;</span><br><span class="line">            @Override</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                //若使用普通的重入锁代替读写锁，那么所有的读和写线程之间必须相互等待，耗时将非常长</span><br><span class="line">                try &#123;</span><br><span class="line">                    //demo.handleWrite(writeLock, new Random().nextInt());</span><br><span class="line">                    demo.handleWrite(lock, new Random().nextInt());</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        for (int i = 0; i &lt; 18; i++) &#123;</span><br><span class="line">            new Thread(readRunnale).start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int i = 18; i &lt; 20; i++) &#123;</span><br><span class="line">            new Thread(writeRunnale).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>容易发现，使用普通的重入锁代替读写锁，所有的读和写线程间都必须相互等待，整个程序执行时间会长达20秒，而采用读写锁时，大约2秒多就能结束，读写分离使读线程完全并行，而写会阻塞读，这里是读操作次数远远大于写的情况，读写锁发挥很大功效。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/21/Mysql中的锁/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/01/21/Mysql中的锁/" class="post-title-link" itemprop="url">Mysql中的锁</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-01-21 14:57:24" itemprop="dateCreated datePublished" datetime="2019-01-21T14:57:24+08:00">2019-01-21</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-21 16:44:28" itemprop="dateModified" datetime="2019-03-21T16:44:28+08:00">2019-03-21</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/01/21/Mysql中的锁/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/01/21/Mysql中的锁/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Mysql中的锁"><a href="#Mysql中的锁" class="headerlink" title="Mysql中的锁"></a>Mysql中的锁</h1><p>我们要开发多用户，数据库驱动的应用，有一个难点是要最大程度利用数据库的并发访问，而且还要确保每个用户能以一致的方式去读取和修改数据。所以就有了锁的机制，这也是数据库系统区分于文件系统的一个关键特性。InnoDB引擎与Mysql的其他存储引擎相比，在此方面更具优势，只有正确了解这些锁的内部机制才能够充分发挥InnoDB引擎在锁方面的优势。</p>
+<h2 id="什么是锁"><a href="#什么是锁" class="headerlink" title="什么是锁"></a>什么是锁</h2><p>锁是数据库系统区别于文件系统的一个关键特性，锁机制管理对共享资源的并发访问。<strong>InnoDb存储引擎会在行级别上对表数据上锁</strong>，这是OK的。而且除了表数据以外，InnoDB存储引擎也在数据库内部其他地方使用锁，从而为不同的多种资源提供并发访问。比如操作缓冲池中的LRU列表，删除，添加，移动LRU列表中的元素，为保证一致性，必须要有锁的介入。<strong>数据库系统使用锁是为了支持对共享资源进行并发访问，提供数据的完整性与一致性。</strong></p>
+<p>在不同数据库之中，锁的实现是多种多样的，SQL语法层面，由于SQL标准的存在，易于熟悉多个关系数据库系统。但是对于锁，用户可能只对特定系统的锁定模型有一定经验。但这不意味着熟悉其他数据库的锁定模型。举例来说，MySQL的InnoDB存储引擎和MyISAM存储引擎对锁的实现完全不同。</p>
+<p><strong>MyISAM的锁是表锁设计</strong>，并发情况下的读是没有问题的，但是并发插入的性能就要差一些。而对于SQL Server数据库，在SQL Server2005版本前都是页锁，相对表锁的MyISAM引擎，并发性能是更高的，到2005版本，SQL server开始支持<strong>乐观并发</strong>与<strong>悲观并发</strong>，在乐观并发下开始支持行级锁，但它的实现方式和InnoDB存储引擎的实现方式完全不同，在SQL Server下，锁是一种稀有的资源，锁越多，开销越大，这种情况下会有<strong>锁升级</strong>，行锁会升级到表锁，这时并发性能又回到了以前。</p>
+<p>InnoDB存储引擎锁的实现与Oracle很类似，提供一致性的非锁定读，行级锁支持。行级锁没有相关额外的开销，而且可以同时得到并发性和一致性。</p>
+<h2 id="Lock与Latch"><a href="#Lock与Latch" class="headerlink" title="Lock与Latch"></a>Lock与Latch</h2><p>数据库中，Lock与Latch都称为锁，但两者截然不同，<strong>这里主要关注lock</strong>。</p>
+<p>latch为轻量级的锁，其要求锁定的时间很短，若持续时间长，则应用的性能会非常差，在InnoDB存储引擎中，latch又可以分为mutex和rwlock。目的是保证并发线程操作临界资源的准确性，而且Latch通常没有死锁检测的机制。</p>
+<p>而lock的对象为事务，用来<strong>锁定数据库中的对象</strong>，比如<strong>表，行，页</strong>。而且一般lock的对象只在事务commit或rollback后释放。（不同事务隔离级别释放的时间可能不同）。此外，<strong>lock是有死锁机制的</strong>。</p>
+<h2 id="InnoDB存储引擎中的锁"><a href="#InnoDB存储引擎中的锁" class="headerlink" title="InnoDB存储引擎中的锁"></a>InnoDB存储引擎中的锁</h2><p>InnoDB存储引擎实现如下两种标准的行级锁：</p>
+<ul>
+<li><strong>共享锁，允许事务读一行数据</strong>(S Lock)</li>
+<li><strong>排他锁，允许事务删除或者更新一行数据</strong>(X Lock)</li>
+</ul>
+<p>如果一个事务T1已经获得了行r的共享锁，那么另外的事务T2可以立即获得行r的共享锁，因为读取并未改变行r的数据，这种情况叫锁兼容。若事务T3想获得行r的排他锁，则<strong>必须等待事务T1，T2释放行r上的共享锁</strong>。这种情况叫锁不兼容。X锁和任何的锁都不兼容，而S锁仅与S锁兼容。注意S和X都是行锁，兼容是指对同一记录锁的兼容性情况。</p>
+<p>此外，InnoDB存储引擎支持多粒度锁定，<strong>这种锁定支持事务在行级上的锁和表级上的锁同时存在</strong>，为支持在不同粒度上进行加锁操作，InnoDB存储引擎支持一种额外的加锁方式，称为<strong>意向锁</strong>，意向锁是将锁定的对象分为多个层次，这意味着事务希望在更细粒度上进行加锁。</p>
+<p>若将上锁的对象看作一棵树，对最下层的对象上锁，也就是对最细粒度的对象上锁，则需要对数据库A，表，页上意向锁IX，最后对记录r上X锁。若任何一部分导致等待，则该操作需要等待粗粒度锁的完成。</p>
+<p>InnoDB对意向锁的支持比较简练，其意向锁即为表级别的锁，支持两种意向锁：</p>
+<ul>
+<li>意向共享锁（IS LOCK），事务想要获得一张表中某几行的共享锁</li>
+<li>意向排他锁（IX LOCK），事务想要获得一张表中某几行的排他锁</li>
+</ul>
+<p>因为InnoDB存储引擎支持的是行级别的锁，所以意向锁不会阻塞除全表扫描以外的任何请求。所以表级意向锁和行级锁的兼容性可以查表得到。</p>
 
           
         
@@ -909,7 +1463,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-count">16</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
