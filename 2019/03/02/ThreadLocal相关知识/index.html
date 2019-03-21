@@ -103,7 +103,7 @@
 <meta property="og:site_name" content="sleepyhead沉思录">
 <meta property="og:description" content="ThreadLocal相关知识并发程序中，除了控制资源的访问外，还可以增加资源来保证所有对象的线程安全。比如让100个人填写个人信息表，如果只有一支笔，则大家需要挨个填写，对管理人员来说，必须保证大家不会哄抢这仅存的一支笔。另一个角度出发，可以干脆准备100支笔，人手一支，所有人可以一起做，很快就能完成表格填写工作。锁可以理解为第一种思路，则ThreadLocal是使用第二种思路。 ThreadL">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-20T02:24:01.170Z">
+<meta property="og:updated_time" content="2019-03-21T12:05:24.406Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ThreadLocal相关知识">
 <meta name="twitter:description" content="ThreadLocal相关知识并发程序中，除了控制资源的访问外，还可以增加资源来保证所有对象的线程安全。比如让100个人填写个人信息表，如果只有一支笔，则大家需要挨个填写，对管理人员来说，必须保证大家不会哄抢这仅存的一支笔。另一个角度出发，可以干脆准备100支笔，人手一支，所有人可以一起做，很快就能完成表格填写工作。锁可以理解为第一种思路，则ThreadLocal是使用第二种思路。 ThreadL">
@@ -352,7 +352,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-20 10:24:01" itemprop="dateModified" datetime="2019-03-20T10:24:01+08:00">2019-03-20</time>
+                <time title="修改时间：2019-03-21 20:05:24" itemprop="dateModified" datetime="2019-03-21T20:05:24+08:00">2019-03-21</time>
               
             
           </span>
@@ -411,6 +411,10 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public T get() &#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    if (map != null) &#123;</span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(this);</span><br><span class="line">        if (e != null)</span><br><span class="line">           return (T)e.value;</span><br><span class="line">    &#125;</span><br><span class="line">    return setInitialValue();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>get()方法首先取得当前线程的ThreadLocalMap对象，然后通过将自己作为key，取得内部实际数据。了解ThreadLocal内部实现后，有一个问题，<strong>这些变量是维护在Thread类内部的</strong>(ThreadLocalMap定义所在类)，意味着只要线程不退出，对象引用就一直存在。</p>
 <p><strong>当线程退出时</strong>，Thread类会进行一些清理工作，包括清理ThreadLocalMap，看看下面的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">private void exit() &#123;</span><br><span class="line">    if (group != null) &#123;</span><br><span class="line">        group.threadTerminated(this);</span><br><span class="line">        group = null;</span><br><span class="line">    &#125;</span><br><span class="line">    target = null;</span><br><span class="line">    //加速资源清理</span><br><span class="line">    threadLocals = null;</span><br><span class="line">    inheritableThreadLocals = null;</span><br><span class="line">    inheritedAccessControlContext = null;</span><br><span class="line">    blocker = null;</span><br><span class="line">    uncaughtExceptionHandler = null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以，当我们使用线程池时，意味着当前线程不一定会退出（固定大小的线程池，线程总是存在），如果是这样，将一些大大的对象设置到ThreadLocal中（实际保存在线程持有的threadLocals Map内），可能会使线程出现内存泄漏的可能（你设置了对象到ThreadLocal中，但是不清理它，使用几次后，这个对象也不再有用了，但它无法被回收）。此时如果希望及时回收对象，最好使用<strong>ThreadLocal.remove()方法将这个变量移除</strong>，就像我们习惯性关闭数据库连接一样。确实不需要这个对象了，就应该告诉虚拟机将其回收掉。防止内存泄漏。</p>
+<p>还有一种情况是JDK允许像释放普通变量一样释放ThreadLocal，我们在写代码时，有时为了加速垃圾回收，写出类似obj = null的代码，这样做的话obj所指的对象会更容易被垃圾回收器发现从而加速回收。</p>
+<p>而对于ThreadLocal的变量，也手动将其设置为null，比如tl = null，这样一来这个ThreadLocal所对应的所有线程的局部变量都有可能被回收，下面看看这其中的原理：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
       

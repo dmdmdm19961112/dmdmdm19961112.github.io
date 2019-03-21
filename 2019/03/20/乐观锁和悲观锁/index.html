@@ -96,17 +96,17 @@
 
 
 
-  <meta name="description" content="乐观锁和悲观锁人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，">
+  <meta name="description" content="CAS策略人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻">
 <meta property="og:type" content="article">
-<meta property="og:title" content="乐观锁和悲观锁">
+<meta property="og:title" content="CAS策略">
 <meta property="og:url" content="http://yoursite.com/2019/03/20/乐观锁和悲观锁/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
-<meta property="og:description" content="乐观锁和悲观锁人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，">
+<meta property="og:description" content="CAS策略人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-20T06:33:48.814Z">
+<meta property="og:updated_time" content="2019-03-21T13:41:01.441Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="乐观锁和悲观锁">
-<meta name="twitter:description" content="乐观锁和悲观锁人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，">
+<meta name="twitter:title" content="CAS策略">
+<meta name="twitter:description" content="CAS策略人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻">
 
 
 
@@ -123,7 +123,7 @@
   };
 </script>
 
-  <title>乐观锁和悲观锁 | sleepyhead沉思录</title>
+  <title>CAS策略 | sleepyhead沉思录</title>
   
 
 
@@ -309,7 +309,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">乐观锁和悲观锁
+          <h1 class="post-title" itemprop="name headline">CAS策略
 
               
             
@@ -335,12 +335,24 @@
                 
               
 
-              <time title="创建时间：2019-03-20 14:27:35 / 修改时间：14:33:48" itemprop="dateCreated datePublished" datetime="2019-03-20T14:27:35+08:00">2019-03-20</time>
+              <time title="创建时间：2019-03-20 14:27:35" itemprop="dateCreated datePublished" datetime="2019-03-20T14:27:35+08:00">2019-03-20</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-21 21:41:01" itemprop="dateModified" datetime="2019-03-21T21:41:01+08:00">2019-03-21</time>
               
             
           </span>
@@ -384,8 +396,22 @@
       
 
       
-        <h1 id="乐观锁和悲观锁"><a href="#乐观锁和悲观锁" class="headerlink" title="乐观锁和悲观锁"></a>乐观锁和悲观锁</h1><p>人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。</p>
-<p>对并发控制而言，</p>
+        <h1 id="CAS策略"><a href="#CAS策略" class="headerlink" title="CAS策略"></a>CAS策略</h1><p>人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。</p>
+<p>对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻塞线程执行。<strong>而无锁是一种乐观的策略</strong>，会假设对资源的访问是没有冲突的。既然没有冲突则不需要等待，所有的线程都可以在不停顿的状态下持续执行，若遇到冲突，无锁的策略使用一种叫比较交换的策略（CAS)来鉴别线程冲突，一旦检测到冲突，就重试当前操作直到没有冲突为止。</p>
+<h2 id="并发策略：比较交换-CAS"><a href="#并发策略：比较交换-CAS" class="headerlink" title="并发策略：比较交换(CAS)"></a>并发策略：比较交换(CAS)</h2><p>同锁相比，CAS会使程序看上去更复杂一些。但是由于其非阻塞性，它是不存在死锁问题的，对死锁问题天然免疫。而且线程间的相互影响也比基于锁的方式更小，更重要的是，使用无锁的方式没有锁竞争带来的系统开销，也没有线程间频繁调度带来的开销。<strong>它比基于锁的方式有更为优越的性能</strong>。</p>
+<p>硬件层面，大部分的现代处理器都已经支持原子化的CAS指令，在jdk5.0后，虚拟机便可以使用这个指令实现并发操作与并发数据结构，而且，这种操作在虚拟机中无处不在。</p>
+<h3 id="简介CAS算法"><a href="#简介CAS算法" class="headerlink" title="简介CAS算法"></a>简介CAS算法</h3><p>CAS包含三个参数CAS(V, E, N)，V表示要更新的变量，E表示预期值，N表示新值。只有V等于E值时，才将V的值设为N，若V值与E值不同，则说明有其他线程进行了更新，这时当前线程什么都不做。最后，CAS算法返回当前V的真实值。CAS算法是一种乐观的策略，它总是认为自己能够成功完成操作，当多个线程同时使用CAS操作一个变量时，<strong>只有一个会胜出并成功更新</strong>，其余均会失败。失败的线程不会被挂起，而是仅被告知失败，而且<strong>允许再次尝试</strong>，当然也允许失败的线程放弃操作。<strong>所以CAS操作即使没有锁</strong>，也能够发现其他线程对当前线程的干扰，并进行适当处理。</p>
+<p>通俗来讲，CAS算法需要你额外给出一个期望值，就是你认为这个变量现在应该是什么样子。若变量不是你想象中的那样，说明已经被别人修改过了，需要你重新读取，再次尝试修改。</p>
+<h2 id="无锁的线程安全整数：AtomicInteger"><a href="#无锁的线程安全整数：AtomicInteger" class="headerlink" title="无锁的线程安全整数：AtomicInteger"></a>无锁的线程安全整数：AtomicInteger</h2><p>为让开发者能受益于CAS等CPU指令，JDK并发包中有一个atomic包，里面实现了一些直接使用CAS操作的线程安全的类型。</p>
+<p>AtomicInteger是最常用的一个类，可以将其看做一个整数，但是它是可变的（与Integer不同）。而且是线程安全的，对其进行修改等操作，都是用<strong>CAS指令</strong>进行的。下面列举AtomicInteger的一些方法，对其他原子类，操作也是类似的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public final int get()   //取得当前值</span><br><span class="line">public final void set(int newValue)    //设置当前值</span><br><span class="line">public final int getAndSet(int newValue)     //设置新值，并返回旧值</span><br><span class="line">public final boolean compareAndSet(int expect, int u)     //如果当前值为expect，则设置为u</span><br><span class="line">public final int getAndIncrement()           //当前值加一，返回旧值</span><br><span class="line">public final int getAndDecrement()    //当前值减一，返回旧值</span><br><span class="line">public final int getAndAdd(int delta)   //当前值增加delta，返回旧值</span><br><span class="line">public final int incrementAndGet()     //当前值加1，返回新值</span><br><span class="line">public final int decrementAndGet()     //当前值减一，返回新值</span><br><span class="line">public final int addAndGet(int delta)   //当前值增加delta，返回新值</span><br></pre></td></tr></table></figure>
+<p>就内部实现而言，AtomicInteger中保存了一个核心字段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private volatile int value;</span><br></pre></td></tr></table></figure>
+<p>它就代表了AtomicInteger的当前实际取值，此外还有一个：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private static final long valueOffset;</span><br></pre></td></tr></table></figure>
+<p>这保存了value字段在AtomicInteger对象中的偏移量，这个偏移量是实现AtomicInteger的关键。</p>
+<p>下面给出使用AtomicInteger的一个示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -541,7 +567,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#乐观锁和悲观锁"><span class="nav-number">1.</span> <span class="nav-text">乐观锁和悲观锁</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CAS策略"><span class="nav-number">1.</span> <span class="nav-text">CAS策略</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#并发策略：比较交换-CAS"><span class="nav-number">1.1.</span> <span class="nav-text">并发策略：比较交换(CAS)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介CAS算法"><span class="nav-number">1.1.1.</span> <span class="nav-text">简介CAS算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无锁的线程安全整数：AtomicInteger"><span class="nav-number">1.2.</span> <span class="nav-text">无锁的线程安全整数：AtomicInteger</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -691,7 +717,7 @@
   var disqus_config = function () {
     this.page.url = "http://yoursite.com/2019/03/20/乐观锁和悲观锁/";
     this.page.identifier = "2019/03/20/乐观锁和悲观锁/";
-    this.page.title = '乐观锁和悲观锁';
+    this.page.title = 'CAS策略';
     };
   function loadComments () {
     var d = document, s = d.createElement('script');
