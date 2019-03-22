@@ -292,7 +292,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/20/乐观锁和悲观锁/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="段铭">
@@ -312,7 +312,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/03/20/乐观锁和悲观锁/" class="post-title-link" itemprop="url">CAS策略</a>
+                <a href="/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/" class="post-title-link" itemprop="url">高效读写的队列：ConcurrentLinkedQueue</a>
               
             
           </h1>
@@ -337,7 +337,165 @@
                 
               
 
-              <time title="创建时间：2019-03-20 14:27:35" itemprop="dateCreated datePublished" datetime="2019-03-20T14:27:35+08:00">2019-03-20</time>
+              <time title="创建时间：2019-03-22 11:15:05 / 修改时间：11:31:57" itemprop="dateCreated datePublished" datetime="2019-03-22T11:15:05+08:00">2019-03-22</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/22/高效读写的队列：ConcurrentLinkedQueue/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="剖析ConcurrentLinkedQueue"><a href="#剖析ConcurrentLinkedQueue" class="headerlink" title="剖析ConcurrentLinkedQueue"></a>剖析ConcurrentLinkedQueue</h2><p>Queue是常用的数据结构之一，在JDK中提供了一个ConcurrentLinkedQueue类用来实现高并发队列。<strong>这个队列利用链表作为其数据结构</strong>，ConcurrentLinkedQueue应该算是高并发环境下<strong>性能最好</strong>的队列。</p>
+<p>下面介绍ConcurrentLinkedQueue的实现细节，注意它的实现与无锁操作有关（CAS)。</p>
+<p>既然是用链表实现的，链表中自然会定义相关的节点，在ConcurrentLinkedQueue中，定义的节点Node核心如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">private static class Node&lt;E&gt; &#123;</span><br><span class="line">    volatile E item;</span><br><span class="line">    volatile Node&lt;E&gt; next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>item用来存放目标元素，比如列表中存放String时，item就是String类型，字段next表示当前Node的下一个元素，这样每个Node就能环环相扣，串在一起。</p>
+<p>ConcurrentLinkedQueue是一个基于链接节点的无界线程安全队列，采用先进先出的规则对节点进行排序，添加一个元素时，添加到队列尾部，获取一个元素时，返回队列头部的元素，它采用CAS算法实现。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/16/乐观锁和悲观锁/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/03/16/乐观锁和悲观锁/" class="post-title-link" itemprop="url">CAS策略</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-16 14:27:35" itemprop="dateCreated datePublished" datetime="2019-03-16T14:27:35+08:00">2019-03-16</time>
             
 
             
@@ -354,7 +512,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-21 21:41:01" itemprop="dateModified" datetime="2019-03-21T21:41:01+08:00">2019-03-21</time>
+                <time title="修改时间：2019-03-22 11:11:35" itemprop="dateModified" datetime="2019-03-22T11:11:35+08:00">2019-03-22</time>
               
             
           </span>
@@ -368,9 +526,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/03/20/乐观锁和悲观锁/#comments" itemprop="discussionUrl">
+                <a href="/2019/03/16/乐观锁和悲观锁/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/20/乐观锁和悲观锁/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/16/乐观锁和悲观锁/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -415,7 +573,25 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private static final long valueOffset;</span><br></pre></td></tr></table></figure>
 <p>这保存了value字段在AtomicInteger对象中的偏移量，这个偏移量是实现AtomicInteger的关键。</p>
 <p>下面给出使用AtomicInteger的一个示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">package com.example.cas;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"></span><br><span class="line">public class AtomicIntegerDemo &#123;</span><br><span class="line"></span><br><span class="line">    static AtomicInteger i = new AtomicInteger();</span><br><span class="line">    public static class AddThread implements Runnable &#123;</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            for (int k = 0; k &lt; 10000; k++)</span><br><span class="line">                //使用CAS操作将自己加一，如果不是线程安全，这里的i应该小于100000</span><br><span class="line">                i.incrementAndGet();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        Thread[] ts = new Thread[10];</span><br><span class="line">        for (int k = 0; k &lt; 10; k++) &#123;</span><br><span class="line">            ts[k] = new Thread(new AddThread());</span><br><span class="line">        &#125;</span><br><span class="line">        for (int k = 0; k &lt; 10; k++) &#123;</span><br><span class="line">            ts[k].start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int k = 0; k &lt; 10; k++) &#123;</span><br><span class="line">            //主线程等待ts[k]结束</span><br><span class="line">            ts[k].join();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果不是线程安全，i的值应该小于100000。</p>
+<p>使用AtomicInteger会比使用锁具有更好的性能，可以写一段简单代码分析两者的性能。下面是<strong>incrementAndGet()</strong>的内部实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public final int incrementAndGet() &#123;</span><br><span class="line">    //这里死循环的原因是CAS操作未必是成功的，对于不成功的情况，我们要不停进行尝试</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        int current = get();</span><br><span class="line">        int next = current + 1;</span><br><span class="line">        if (compareAndSet(current, next))</span><br><span class="line">           return next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中get()方法非常简单，就是返回内部数据value。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public final int get() &#123;</span><br><span class="line">    return value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面incrementAndGet()中，取得CAS必需的两个参数：期望值与新值，使用compareAndSet()将新值next写入，**成功的条件是在写入的时刻，当前的值要等于刚刚取得的current，如果不是这样，则说明AtomicInteger的值被其他线程修改过了，当前线程看到的状态是一个过期状态。所以，compareAndSet返回失败，需要进行下一次重试直到成功。这就是CAS操作的基本思想，无论程序多么复杂，基本思想是不变的。</p>
+<p>与AtomicInteger相似的类还有AtomicLong来代表long型，AtomicBoolean表示boolean型，AtomicReference表示对象引用。</p>
+<h2 id="compareAndSet-的实现：Java中的指针–Unsafe类"><a href="#compareAndSet-的实现：Java中的指针–Unsafe类" class="headerlink" title="compareAndSet()的实现：Java中的指针–Unsafe类"></a>compareAndSet()的实现：Java中的指针–Unsafe类</h2><p>incrementAndGet()中compareAndSet()的实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public final boolean compareAndSet(int expect, int update) &#123;</span><br><span class="line">    return unsafe.compareAndSwapInt(this, valueOffset, expect, update);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里有个特殊的变量unsafe，是<strong>sun.misc.Unsafe</strong>类型。这里的Unsafe类封装了一些不安全的操作，这里的不安全的操作就是指针，Java中去除了指针，但是这里的Unsafe封装了一些类似指针的操作。compareAndSwapInt方法是一个native方法，下面看看它各参数的含义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public final native boolean compareAndSwapInt(Object o, long offset, int expected, int x);</span><br></pre></td></tr></table></figure>
+<p>第一个参数是给定的对象，offset为对象内的偏移量（就是一个字段到对象头部的偏移量，通过偏移量快速定位字段），expected表示期望值，x表示要设置的值。若指定字段的值等于expected，则将其设置为x。</p>
+<p>不难看出，compareAndSwapInt()方法的内部，是使用CAS原子指令来完成的。ConcurrentLinkedQueue中的Node的一些CAS操作也是由Unsafe操作实现的。</p>
+<p>虽然Java抛弃了指针，但是关键时刻还是有类似指针的技术，这里底层的unsafe实现就是一个例子，JDK开发人员不希望大家使用这个类，我们获得Unsafe实例的方法是调动其工厂方法getUnsafe()，但是我们的实现会检查调用getUnsafe()方法的类，若这个类的ClassLoader不为null，就直接抛出异常，拒绝工作，所以我们的应用程序无法直接使用Unsafe类，它是一个JDK内部使用的专属类。</p>
+<h2 id="无锁的对象引用：AtomicReference"><a href="#无锁的对象引用：AtomicReference" class="headerlink" title="无锁的对象引用：AtomicReference"></a>无锁的对象引用：AtomicReference</h2><p>AtomicInteger与AtomicInteger很类似，但AtomicInteger是对整数的封装，而AtomicReference是对普通对象引用的封装。它可以<strong>保证你在修改对象引用时的线程安全性</strong>，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">package com.example.cas;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.atomic.AtomicReference;</span><br><span class="line"></span><br><span class="line">public class AtomicReferenceTest &#123;</span><br><span class="line"></span><br><span class="line">    public static AtomicReference&lt;User&gt; atomicUserRef = new AtomicReference&lt;User&gt;();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        User user = new User(&quot;conan&quot;, 15);</span><br><span class="line">        atomicUserRef.set(user);</span><br><span class="line">        User updateUser = new User(&quot;shinichi&quot;, 17);</span><br><span class="line">        atomicUserRef.compareAndSet(user, updateUser);</span><br><span class="line">        System.out.println(atomicUserRef.get().getName());</span><br><span class="line">        System.out.println(atomicUserRef.get().getOld());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    static class User &#123;</span><br><span class="line">        private String name;</span><br><span class="line">        private int old;</span><br><span class="line"></span><br><span class="line">        public User(String name, int old) &#123;</span><br><span class="line">            this.name = name;</span><br><span class="line">            this.old = old;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public String getName()</span><br><span class="line">        &#123;</span><br><span class="line">            return name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public int getOld() &#123;</span><br><span class="line">            return old;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先构建一个user对象，然后将user对象设置进AtomicReference中，最后调用compareAndSet进行原子更新操作，实现原理和AtomicInteger里面的compareAndSet方法相同。输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shinichi</span><br><span class="line">17</span><br></pre></td></tr></table></figure>
 
           
         
@@ -704,7 +880,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-21 18:54:00" itemprop="dateModified" datetime="2019-03-21T18:54:00+08:00">2019-03-21</time>
+                <time title="修改时间：2019-03-21 19:19:53" itemprop="dateModified" datetime="2019-03-21T19:19:53+08:00">2019-03-21</time>
               
             
           </span>
@@ -1057,7 +1233,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-18 18:58:20" itemprop="dateModified" datetime="2019-03-18T18:58:20+08:00">2019-03-18</time>
+                <time title="修改时间：2019-03-22 12:17:41" itemprop="dateModified" datetime="2019-03-22T12:17:41+08:00">2019-03-22</time>
               
             
           </span>
@@ -1142,13 +1318,15 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">private E extract() &#123;</span><br><span class="line">    final Object[] items = this.items;</span><br><span class="line">    E x = this.&lt;E&gt;cast(items[takeIndex]);</span><br><span class="line">    items[takeIndex] = null;</span><br><span class="line">    takeIndex = inc(takeIndex);</span><br><span class="line">    --count;</span><br><span class="line">    //用于通知的函数</span><br><span class="line">    notFull.signal();</span><br><span class="line">    return x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>BlockingQueue的使用非常普遍，在”生产者消费者’’相关博客中，还可以清楚的看到<strong>如何使用BlockingQueue</strong>解耦生产者和消费者。</p>
 <h2 id="LinkedBlockingQueue"><a href="#LinkedBlockingQueue" class="headerlink" title="LinkedBlockingQueue"></a>LinkedBlockingQueue</h2><p>这是一个用链表实现的有界阻塞队列，此队列的默认和最大长度为Integer.MAX_VALUE。此队列按照先进先出的原则对元素进行排序。</p>
-<h2 id="PriorBlockingQueue"><a href="#PriorBlockingQueue" class="headerlink" title="PriorBlockingQueue"></a>PriorBlockingQueue</h2><p>PriorityBlockingQueue是一个支持优先级的无界队列，默认情况下元素采用自然顺序排列，也可通过比较器comparator指定元素排序规则，元素按照升序排列。</p>
+<h2 id="PriorityBlockingQueue"><a href="#PriorityBlockingQueue" class="headerlink" title="PriorityBlockingQueue"></a>PriorityBlockingQueue</h2><p>PriorityBlockingQueue是一个支持优先级的无界队列，默认情况下元素采用自然顺序排列，也可通过比较器comparator指定元素排序规则，元素按照升序排列。</p>
 <h2 id="DelayQueue"><a href="#DelayQueue" class="headerlink" title="DelayQueue"></a>DelayQueue</h2><p>DelayQueue是一个支持延时获取元素的无界阻塞队列。队列使用PriorQueue实现。队列中的元素必须实现Delayed接口，在创建元素时可以指定多久才能从队列中获取当前元素。可以将DelayQueue应用在以下场景：</p>
 <ul>
 <li>缓存系统设计：可以用DelayQueue保存缓存元素的有效期，使用一个线程循环查询DelayQueue，一旦能从DelayQueue中获取元素时表示缓存有效期到了。</li>
 <li>定时任务调度：使用DelayQueue保存当天将会执行的任务和执行时间，一旦从DelayQueue中获取到任务就开始执行，比如TimerQueue是使用DelayQueue实现。</li>
 </ul>
 <h2 id="SynchronousQueue"><a href="#SynchronousQueue" class="headerlink" title="SynchronousQueue"></a>SynchronousQueue</h2><p>SynchronousQueue是一个不存储元素的阻塞队列，每一个put操作必须等待take操作，否则不能继续添加元素。SynchronousQueue必须等待一个take操作，否则不能继续添加元素。SynchronousQueue可以看成一个传球手，负责把生产者线程处理的数据直接传递给消费者线程，队列本身不存储任何元素，非常适合于传递性场景，比如在一个线程中使用的数据，传递给另一个线程使用，SynchronousQueue的<strong>吞吐量</strong>高于LinkedBlockingQueue和ArrayBlockingQueue。</p>
+<h3 id="SynchronousQueue实现原理"><a href="#SynchronousQueue实现原理" class="headerlink" title="SynchronousQueue实现原理"></a>SynchronousQueue实现原理</h3><p>SynchronousQueue是一个非常特殊的等待队列，SynchronousQueue的容量为0，任何一个对SynchronousQueue的写需要等待一个对SynchronousQueue的读，反之亦然，与其说SynchronousQueue是一个队列，不如说是一个<strong>数据交换通道</strong>，SynchronousQueue和<strong>无锁</strong>的操作脱不了联系，其内部大量使用了无锁工具。SynchronousQueue将put()和take()两个截然不同的操作抽象为一个共通方法Transferer.transfer()，字面上看就是数据传递的意思，transfer()的完整签名如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Object transfer(Object e, boolean timed, long nanos);</span><br></pre></td></tr></table></figure>
 <h2 id="LinkedTransferQueue"><a href="#LinkedTransferQueue" class="headerlink" title="LinkedTransferQueue"></a>LinkedTransferQueue</h2><p>LinkedTransferQueue是一个由链表结构组成的无界阻塞TrnsferQueue队列，相对于其他阻塞队列，LinkedTransferQueue多了tryTransfer和transfer方法。</p>
 <h2 id="LinkedBlockingDeque"><a href="#LinkedBlockingDeque" class="headerlink" title="LinkedBlockingDeque"></a>LinkedBlockingDeque</h2><p>LinkedBlockingDeque是一个由链表结构组成的双向阻塞队列。所谓双向队列指可以从队列的两端插入和移出元素。双向队列指你可以从队列的两端插入移出元素。双端队列因为多了一个操作队列的入口，在多线程同时入队时，减少了一半的竞争。</p>
 <h2 id="阻塞队列的实现原理"><a href="#阻塞队列的实现原理" class="headerlink" title="阻塞队列的实现原理"></a>阻塞队列的实现原理</h2><p>如果队列是空的，消费者会一直等待，当生产者添加元素时，消费者是如何知道当前队列有元素的呢？如何高效设计阻塞队列？使生产者和消费者能高效通讯，JDK中采用通知模式实现，通知模式即生产者往满的队列中添加元素时会阻塞住生产者，当消费者消费了一个队列中的元素时，会通知生产者当前队列可用，查看JDK源码，发现ArrayBlockingQueue使用了Condition实现。</p>
@@ -1670,7 +1848,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-03-21 20:05:24" itemprop="dateModified" datetime="2019-03-21T20:05:24+08:00">2019-03-21</time>
+                <time title="修改时间：2019-03-22 11:42:24" itemprop="dateModified" datetime="2019-03-22T11:42:24+08:00">2019-03-22</time>
               
             
           </span>
@@ -1734,8 +1912,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">private void exit() &#123;</span><br><span class="line">    if (group != null) &#123;</span><br><span class="line">        group.threadTerminated(this);</span><br><span class="line">        group = null;</span><br><span class="line">    &#125;</span><br><span class="line">    target = null;</span><br><span class="line">    //加速资源清理</span><br><span class="line">    threadLocals = null;</span><br><span class="line">    inheritableThreadLocals = null;</span><br><span class="line">    inheritedAccessControlContext = null;</span><br><span class="line">    blocker = null;</span><br><span class="line">    uncaughtExceptionHandler = null;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>所以，当我们使用线程池时，意味着当前线程不一定会退出（固定大小的线程池，线程总是存在），如果是这样，将一些大大的对象设置到ThreadLocal中（实际保存在线程持有的threadLocals Map内），可能会使线程出现内存泄漏的可能（你设置了对象到ThreadLocal中，但是不清理它，使用几次后，这个对象也不再有用了，但它无法被回收）。此时如果希望及时回收对象，最好使用<strong>ThreadLocal.remove()方法将这个变量移除</strong>，就像我们习惯性关闭数据库连接一样。确实不需要这个对象了，就应该告诉虚拟机将其回收掉。防止内存泄漏。</p>
 <p>还有一种情况是JDK允许像释放普通变量一样释放ThreadLocal，我们在写代码时，有时为了加速垃圾回收，写出类似obj = null的代码，这样做的话obj所指的对象会更容易被垃圾回收器发现从而加速回收。</p>
-<p>而对于ThreadLocal的变量，也手动将其设置为null，比如tl = null，这样一来这个ThreadLocal所对应的所有线程的局部变量都有可能被回收，下面看看这其中的原理：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>而对于ThreadLocal的变量，也手动将其设置为null，比如tl = null，这样一来这个ThreadLocal所对应的所有线程的局部变量都有可能被回收。</p>
 
           
         
@@ -1990,178 +2167,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/27/高效读取：不变模式下的CopyOnWriteArrayList/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="段铭">
-      <meta itemprop="description" content="编程随想">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="sleepyhead沉思录">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/02/27/高效读取：不变模式下的CopyOnWriteArrayList/" class="post-title-link" itemprop="url">高效读取：不变模式下的CopyOnWriteArrayList</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-02-27 10:25:07" itemprop="dateCreated datePublished" datetime="2019-02-27T10:25:07+08:00">2019-02-27</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-03-18 18:57:37" itemprop="dateModified" datetime="2019-03-18T18:57:37+08:00">2019-03-18</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/02/27/高效读取：不变模式下的CopyOnWriteArrayList/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/02/27/高效读取：不变模式下的CopyOnWriteArrayList/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="高效读取：不变模式下的CopyOnWriteArrayList"><a href="#高效读取：不变模式下的CopyOnWriteArrayList" class="headerlink" title="高效读取：不变模式下的CopyOnWriteArrayList"></a>高效读取：不变模式下的CopyOnWriteArrayList</h1><p>在许多应用场景中，读操作可能远远大于写操作。比如说，一些系统级别的信息，往往只需要加载或者修改很少的次数，但是会被系统中所有模块频繁的访问，对于这种场景，最好是读操作尽可能快，写操作慢一些都没事。</p>
-<p>由于读操作根本不会修改原有的数据，对于每一次读取进行加锁是一种资源浪费。应该允许多个线程同时访问List的内部数据，毕竟读取操作是安全的，根据读写锁的思想，读锁与读锁间确实不发生冲突，但是读操作会受到写操作的阻碍，写操作发生时读操作就必须等待，否则可能读到不一致的数据。同理，读操作正在进行时，程序也不能进行写入。</p>
-<p><strong>为了将读取的性能发挥到极致</strong>，JDK中提供了CopyOnWriteArrayList类。对它来说，读取时完全不用加锁，而且更好的消息是：写入不会阻塞读取操作，只有写入与写入间要进行同步等待，这样一来，<strong>读操作</strong>的性能大幅提升。CopyOnWrite是在写入操作时进行一次自我复制，当这个list需要修改时，并不修改原来的内容，而是对原来的数据进行一次复制，将修改的内容写入副本中，写完之后再将修改完的副本替换原来的数据，<strong>这样就可以保证写操作不会影响读了</strong>，下面看看CopyOnWriteArrayList如何实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//有关读取的实现</span><br><span class="line">//注意这里的array变量是volatile类型</span><br><span class="line">private volatile transient Object[] array;</span><br><span class="line">public E get(int index) &#123;</span><br><span class="line">    return get(getArray(), index);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public Object[] getArray() &#123;</span><br><span class="line">    return array;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private E get(Object[] a, int index) &#123;</span><br><span class="line">    return (E) a[index];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>有关读取的实现中没有任何同步控制与锁操作，理由是内部数组array不会发生修改，只会被另外一个array替换，所以可以保证数据安全。</p>
-<p>但写入操作稍微显得有些麻烦：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">//这里的锁只用于控制写-写的情况</span><br><span class="line">public boolean add(E e) &#123;</span><br><span class="line">    final ReentrantLock lock = this.lock;</span><br><span class="line">    lock.lock();</span><br><span class="line">    try &#123;</span><br><span class="line">        Object[] elements = getArray();</span><br><span class="line">        int len = elements.length;</span><br><span class="line">        Object[] newElements = Arrays.copyOf(elements, len + 1);</span><br><span class="line">        newElements[len] = e;</span><br><span class="line">        setArray(newElements);</span><br><span class="line">        return true;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>写入操作使用锁，这个锁只限于控制写-写的情况，重点在Arrays.copyOf(elements, len + 1)，会生成一个新的数组，然后将新的元素加入新数组，随后用新的数组替换老的数组，整个过程不影响读取，而且修改完后，读取线程立刻可以察觉到这个修改(array变量是volatile类型)。</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2209,7 +2214,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-count">18</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>

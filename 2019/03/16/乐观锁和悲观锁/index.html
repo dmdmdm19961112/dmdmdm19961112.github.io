@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=6.7.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.7.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.7.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="CAS策略人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS策略">
+<meta property="og:url" content="http://yoursite.com/2019/03/16/乐观锁和悲观锁/index.html">
+<meta property="og:site_name" content="sleepyhead沉思录">
+<meta property="og:description" content="CAS策略人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-22T03:11:35.582Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CAS策略">
+<meta name="twitter:description" content="CAS策略人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。 对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/16/乐观锁和悲观锁/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>CAS策略 | sleepyhead沉思录</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">sleepyhead沉思录</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">繁荣昌盛，生生不息</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archives"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/16/乐观锁和悲观锁/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CAS策略
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-16 14:27:35" itemprop="dateCreated datePublished" datetime="2019-03-16T14:27:35+08:00">2019-03-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-22 11:11:35" itemprop="dateModified" datetime="2019-03-22T11:11:35+08:00">2019-03-22</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/16/乐观锁和悲观锁/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/16/乐观锁和悲观锁/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="CAS策略"><a href="#CAS策略" class="headerlink" title="CAS策略"></a>CAS策略</h1><p>人的性格分为乐天派和悲观派。乐天派总会把事情往好的方面去想，他们认为所有事情总是不太容易发生问题，出错是小概率的。而悲观的人群认为出错是一种常态，所以无论巨细，他们都考虑的面面俱到，确保为人处世的万无一失。</p>
+<p>对并发控制而言，锁是一种悲观的策略，它总是假设每一次的临界操作会产生冲突，所以必须对每次操作小心翼翼，如果有多个线程同时需要访问临界区资源，就宁可牺牲性能让线程进行等待，所以说锁会阻塞线程执行。<strong>而无锁是一种乐观的策略</strong>，会假设对资源的访问是没有冲突的。既然没有冲突则不需要等待，所有的线程都可以在不停顿的状态下持续执行，若遇到冲突，无锁的策略使用一种叫比较交换的策略（CAS)来鉴别线程冲突，一旦检测到冲突，就重试当前操作直到没有冲突为止。</p>
+<h2 id="并发策略：比较交换-CAS"><a href="#并发策略：比较交换-CAS" class="headerlink" title="并发策略：比较交换(CAS)"></a>并发策略：比较交换(CAS)</h2><p>同锁相比，CAS会使程序看上去更复杂一些。但是由于其非阻塞性，它是不存在死锁问题的，对死锁问题天然免疫。而且线程间的相互影响也比基于锁的方式更小，更重要的是，使用无锁的方式没有锁竞争带来的系统开销，也没有线程间频繁调度带来的开销。<strong>它比基于锁的方式有更为优越的性能</strong>。</p>
+<p>硬件层面，大部分的现代处理器都已经支持原子化的CAS指令，在jdk5.0后，虚拟机便可以使用这个指令实现并发操作与并发数据结构，而且，这种操作在虚拟机中无处不在。</p>
+<h3 id="简介CAS算法"><a href="#简介CAS算法" class="headerlink" title="简介CAS算法"></a>简介CAS算法</h3><p>CAS包含三个参数CAS(V, E, N)，V表示要更新的变量，E表示预期值，N表示新值。只有V等于E值时，才将V的值设为N，若V值与E值不同，则说明有其他线程进行了更新，这时当前线程什么都不做。最后，CAS算法返回当前V的真实值。CAS算法是一种乐观的策略，它总是认为自己能够成功完成操作，当多个线程同时使用CAS操作一个变量时，<strong>只有一个会胜出并成功更新</strong>，其余均会失败。失败的线程不会被挂起，而是仅被告知失败，而且<strong>允许再次尝试</strong>，当然也允许失败的线程放弃操作。<strong>所以CAS操作即使没有锁</strong>，也能够发现其他线程对当前线程的干扰，并进行适当处理。</p>
+<p>通俗来讲，CAS算法需要你额外给出一个期望值，就是你认为这个变量现在应该是什么样子。若变量不是你想象中的那样，说明已经被别人修改过了，需要你重新读取，再次尝试修改。</p>
+<h2 id="无锁的线程安全整数：AtomicInteger"><a href="#无锁的线程安全整数：AtomicInteger" class="headerlink" title="无锁的线程安全整数：AtomicInteger"></a>无锁的线程安全整数：AtomicInteger</h2><p>为让开发者能受益于CAS等CPU指令，JDK并发包中有一个atomic包，里面实现了一些直接使用CAS操作的线程安全的类型。</p>
+<p>AtomicInteger是最常用的一个类，可以将其看做一个整数，但是它是可变的（与Integer不同）。而且是线程安全的，对其进行修改等操作，都是用<strong>CAS指令</strong>进行的。下面列举AtomicInteger的一些方法，对其他原子类，操作也是类似的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">public final int get()   //取得当前值</span><br><span class="line">public final void set(int newValue)    //设置当前值</span><br><span class="line">public final int getAndSet(int newValue)     //设置新值，并返回旧值</span><br><span class="line">public final boolean compareAndSet(int expect, int u)     //如果当前值为expect，则设置为u</span><br><span class="line">public final int getAndIncrement()           //当前值加一，返回旧值</span><br><span class="line">public final int getAndDecrement()    //当前值减一，返回旧值</span><br><span class="line">public final int getAndAdd(int delta)   //当前值增加delta，返回旧值</span><br><span class="line">public final int incrementAndGet()     //当前值加1，返回新值</span><br><span class="line">public final int decrementAndGet()     //当前值减一，返回新值</span><br><span class="line">public final int addAndGet(int delta)   //当前值增加delta，返回新值</span><br></pre></td></tr></table></figure>
+<p>就内部实现而言，AtomicInteger中保存了一个核心字段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private volatile int value;</span><br></pre></td></tr></table></figure>
+<p>它就代表了AtomicInteger的当前实际取值，此外还有一个：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private static final long valueOffset;</span><br></pre></td></tr></table></figure>
+<p>这保存了value字段在AtomicInteger对象中的偏移量，这个偏移量是实现AtomicInteger的关键。</p>
+<p>下面给出使用AtomicInteger的一个示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">package com.example.cas;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"></span><br><span class="line">public class AtomicIntegerDemo &#123;</span><br><span class="line"></span><br><span class="line">    static AtomicInteger i = new AtomicInteger();</span><br><span class="line">    public static class AddThread implements Runnable &#123;</span><br><span class="line">        public void run() &#123;</span><br><span class="line">            for (int k = 0; k &lt; 10000; k++)</span><br><span class="line">                //使用CAS操作将自己加一，如果不是线程安全，这里的i应该小于100000</span><br><span class="line">                i.incrementAndGet();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws InterruptedException &#123;</span><br><span class="line">        Thread[] ts = new Thread[10];</span><br><span class="line">        for (int k = 0; k &lt; 10; k++) &#123;</span><br><span class="line">            ts[k] = new Thread(new AddThread());</span><br><span class="line">        &#125;</span><br><span class="line">        for (int k = 0; k &lt; 10; k++) &#123;</span><br><span class="line">            ts[k].start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        for (int k = 0; k &lt; 10; k++) &#123;</span><br><span class="line">            //主线程等待ts[k]结束</span><br><span class="line">            ts[k].join();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果不是线程安全，i的值应该小于100000。</p>
+<p>使用AtomicInteger会比使用锁具有更好的性能，可以写一段简单代码分析两者的性能。下面是<strong>incrementAndGet()</strong>的内部实现：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public final int incrementAndGet() &#123;</span><br><span class="line">    //这里死循环的原因是CAS操作未必是成功的，对于不成功的情况，我们要不停进行尝试</span><br><span class="line">    for (;;) &#123;</span><br><span class="line">        int current = get();</span><br><span class="line">        int next = current + 1;</span><br><span class="line">        if (compareAndSet(current, next))</span><br><span class="line">           return next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中get()方法非常简单，就是返回内部数据value。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public final int get() &#123;</span><br><span class="line">    return value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面incrementAndGet()中，取得CAS必需的两个参数：期望值与新值，使用compareAndSet()将新值next写入，**成功的条件是在写入的时刻，当前的值要等于刚刚取得的current，如果不是这样，则说明AtomicInteger的值被其他线程修改过了，当前线程看到的状态是一个过期状态。所以，compareAndSet返回失败，需要进行下一次重试直到成功。这就是CAS操作的基本思想，无论程序多么复杂，基本思想是不变的。</p>
+<p>与AtomicInteger相似的类还有AtomicLong来代表long型，AtomicBoolean表示boolean型，AtomicReference表示对象引用。</p>
+<h2 id="compareAndSet-的实现：Java中的指针–Unsafe类"><a href="#compareAndSet-的实现：Java中的指针–Unsafe类" class="headerlink" title="compareAndSet()的实现：Java中的指针–Unsafe类"></a>compareAndSet()的实现：Java中的指针–Unsafe类</h2><p>incrementAndGet()中compareAndSet()的实现如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public final boolean compareAndSet(int expect, int update) &#123;</span><br><span class="line">    return unsafe.compareAndSwapInt(this, valueOffset, expect, update);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里有个特殊的变量unsafe，是<strong>sun.misc.Unsafe</strong>类型。这里的Unsafe类封装了一些不安全的操作，这里的不安全的操作就是指针，Java中去除了指针，但是这里的Unsafe封装了一些类似指针的操作。compareAndSwapInt方法是一个native方法，下面看看它各参数的含义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public final native boolean compareAndSwapInt(Object o, long offset, int expected, int x);</span><br></pre></td></tr></table></figure>
+<p>第一个参数是给定的对象，offset为对象内的偏移量（就是一个字段到对象头部的偏移量，通过偏移量快速定位字段），expected表示期望值，x表示要设置的值。若指定字段的值等于expected，则将其设置为x。</p>
+<p>不难看出，compareAndSwapInt()方法的内部，是使用CAS原子指令来完成的。ConcurrentLinkedQueue中的Node的一些CAS操作也是由Unsafe操作实现的。</p>
+<p>虽然Java抛弃了指针，但是关键时刻还是有类似指针的技术，这里底层的unsafe实现就是一个例子，JDK开发人员不希望大家使用这个类，我们获得Unsafe实例的方法是调动其工厂方法getUnsafe()，但是我们的实现会检查调用getUnsafe()方法的类，若这个类的ClassLoader不为null，就直接抛出异常，拒绝工作，所以我们的应用程序无法直接使用Unsafe类，它是一个JDK内部使用的专属类。</p>
+<h2 id="无锁的对象引用：AtomicReference"><a href="#无锁的对象引用：AtomicReference" class="headerlink" title="无锁的对象引用：AtomicReference"></a>无锁的对象引用：AtomicReference</h2><p>AtomicInteger与AtomicInteger很类似，但AtomicInteger是对整数的封装，而AtomicReference是对普通对象引用的封装。它可以<strong>保证你在修改对象引用时的线程安全性</strong>，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">package com.example.cas;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.atomic.AtomicReference;</span><br><span class="line"></span><br><span class="line">public class AtomicReferenceTest &#123;</span><br><span class="line"></span><br><span class="line">    public static AtomicReference&lt;User&gt; atomicUserRef = new AtomicReference&lt;User&gt;();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        User user = new User(&quot;conan&quot;, 15);</span><br><span class="line">        atomicUserRef.set(user);</span><br><span class="line">        User updateUser = new User(&quot;shinichi&quot;, 17);</span><br><span class="line">        atomicUserRef.compareAndSet(user, updateUser);</span><br><span class="line">        System.out.println(atomicUserRef.get().getName());</span><br><span class="line">        System.out.println(atomicUserRef.get().getOld());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    static class User &#123;</span><br><span class="line">        private String name;</span><br><span class="line">        private int old;</span><br><span class="line"></span><br><span class="line">        public User(String name, int old) &#123;</span><br><span class="line">            this.name = name;</span><br><span class="line">            this.old = old;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public String getName()</span><br><span class="line">        &#123;</span><br><span class="line">            return name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public int getOld() &#123;</span><br><span class="line">            return old;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先构建一个user对象，然后将user对象设置进AtomicReference中，最后调用compareAndSet进行原子更新操作，实现原理和AtomicInteger里面的compareAndSet方法相同。输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shinichi</span><br><span class="line">17</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/15/倒计时器：CountDownLatch/" rel="next" title="倒计时器：CountDownLatch">
+                <i class="fa fa-chevron-left"></i> 倒计时器：CountDownLatch
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/" rel="prev" title="高效读写的队列：ConcurrentLinkedQueue">
+                高效读写的队列：ConcurrentLinkedQueue <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">段铭</p>
+              <p class="site-description motion-element" itemprop="description">编程随想</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CAS策略"><span class="nav-number">1.</span> <span class="nav-text">CAS策略</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#并发策略：比较交换-CAS"><span class="nav-number">1.1.</span> <span class="nav-text">并发策略：比较交换(CAS)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介CAS算法"><span class="nav-number">1.1.1.</span> <span class="nav-text">简介CAS算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无锁的线程安全整数：AtomicInteger"><span class="nav-number">1.2.</span> <span class="nav-text">无锁的线程安全整数：AtomicInteger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#compareAndSet-的实现：Java中的指针–Unsafe类"><span class="nav-number">1.3.</span> <span class="nav-text">compareAndSet()的实现：Java中的指针–Unsafe类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无锁的对象引用：AtomicReference"><span class="nav-number">1.4.</span> <span class="nav-text">无锁的对象引用：AtomicReference</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">段铭</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.7.0"></script>
+
+  <script src="/js/src/motion.js?v=6.7.0"></script>
+
+
+
+  
+  
+
+  
+  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
+<script src="/js/src/post-details.js?v=6.7.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
+
+
+
+  
+  
+    
+  <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+
+
+<script>
+  var disqus_config = function () {
+    this.page.url = "http://yoursite.com/2019/03/16/乐观锁和悲观锁/";
+    this.page.identifier = "2019/03/16/乐观锁和悲观锁/";
+    this.page.title = 'CAS策略';
+    };
+  function loadComments () {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', '' + +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  
+    loadComments();
+  
+</script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
