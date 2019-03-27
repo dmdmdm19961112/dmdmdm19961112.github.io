@@ -99,11 +99,11 @@
   <meta name="description" content="剖析ConcurrentLinkedQueueQueue是常用的数据结构之一，在JDK中提供了一个ConcurrentLinkedQueue类用来实现高并发队列。这个队列利用链表作为其数据结构，ConcurrentLinkedQueue应该算是高并发环境下性能最好的队列。 下面介绍ConcurrentLinkedQueue的实现细节，注意它的实现与无锁操作有关（CAS)。 既然是用链表实现的，链表">
 <meta property="og:type" content="article">
 <meta property="og:title" content="高效读写的队列：ConcurrentLinkedQueue">
-<meta property="og:url" content="http://yoursite.com/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/index.html">
+<meta property="og:url" content="http://yoursite.com/2019/02/25/高效读写的队列：ConcurrentLinkedQueue/index.html">
 <meta property="og:site_name" content="sleepyhead沉思录">
 <meta property="og:description" content="剖析ConcurrentLinkedQueueQueue是常用的数据结构之一，在JDK中提供了一个ConcurrentLinkedQueue类用来实现高并发队列。这个队列利用链表作为其数据结构，ConcurrentLinkedQueue应该算是高并发环境下性能最好的队列。 下面介绍ConcurrentLinkedQueue的实现细节，注意它的实现与无锁操作有关（CAS)。 既然是用链表实现的，链表">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-22T03:31:57.309Z">
+<meta property="og:updated_time" content="2019-03-27T12:09:13.040Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="高效读写的队列：ConcurrentLinkedQueue">
 <meta name="twitter:description" content="剖析ConcurrentLinkedQueueQueue是常用的数据结构之一，在JDK中提供了一个ConcurrentLinkedQueue类用来实现高并发队列。这个队列利用链表作为其数据结构，ConcurrentLinkedQueue应该算是高并发环境下性能最好的队列。 下面介绍ConcurrentLinkedQueue的实现细节，注意它的实现与无锁操作有关（CAS)。 既然是用链表实现的，链表">
@@ -113,7 +113,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/">
+  <link rel="canonical" href="http://yoursite.com/2019/02/25/高效读写的队列：ConcurrentLinkedQueue/">
 
 
 
@@ -292,7 +292,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/25/高效读写的队列：ConcurrentLinkedQueue/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="段铭">
@@ -335,12 +335,24 @@
                 
               
 
-              <time title="创建时间：2019-03-22 11:15:05 / 修改时间：11:31:57" itemprop="dateCreated datePublished" datetime="2019-03-22T11:15:05+08:00">2019-03-22</time>
+              <time title="创建时间：2019-02-25 11:15:05" itemprop="dateCreated datePublished" datetime="2019-02-25T11:15:05+08:00">2019-02-25</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-27 20:09:13" itemprop="dateModified" datetime="2019-03-27T20:09:13+08:00">2019-03-27</time>
               
             
           </span>
@@ -354,9 +366,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/#comments" itemprop="discussionUrl">
+                <a href="/2019/02/25/高效读写的队列：ConcurrentLinkedQueue/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/22/高效读写的队列：ConcurrentLinkedQueue/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/02/25/高效读写的队列：ConcurrentLinkedQueue/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -420,8 +432,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/16/乐观锁和悲观锁/" rel="next" title="CAS策略">
-                <i class="fa fa-chevron-left"></i> CAS策略
+              <a href="/2019/02/18/可重入锁的好搭档：Condition条件/" rel="next" title="可重入锁的好搭档：Condition条件">
+                <i class="fa fa-chevron-left"></i> 可重入锁的好搭档：Condition条件
               </a>
             
           </div>
@@ -429,6 +441,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/25/可重入锁ReentrantLock详解/" rel="prev" title="可重入锁ReentrantLock详解">
+                可重入锁ReentrantLock详解 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -693,8 +709,8 @@
 
 <script>
   var disqus_config = function () {
-    this.page.url = "http://yoursite.com/2019/03/22/高效读写的队列：ConcurrentLinkedQueue/";
-    this.page.identifier = "2019/03/22/高效读写的队列：ConcurrentLinkedQueue/";
+    this.page.url = "http://yoursite.com/2019/02/25/高效读写的队列：ConcurrentLinkedQueue/";
+    this.page.identifier = "2019/02/25/高效读写的队列：ConcurrentLinkedQueue/";
     this.page.title = '高效读写的队列：ConcurrentLinkedQueue';
     };
   function loadComments () {
