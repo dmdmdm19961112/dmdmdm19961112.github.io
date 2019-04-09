@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=6.7.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.7.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.7.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="HashMap和Hashtable的区别首先总结有几点不同：  父类不同 null值相关问题不同 线程安全性不同 遍历方式不同 初始容量不同 计算哈希值方法不同  Hashtable是Java一开始发布时就提供的键值映射的数据结构，而HashMap产生于JDK1.2。现在Hashtable基本上被弃用了，而HashMap已经成为应用最广泛的一种数据类型。 父类不同HashMap继承于Abstrac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HashMap和Hashtable的区别">
+<meta property="og:url" content="http://yoursite.com/2019/04/06/HashMap和Hashtable的区别/index.html">
+<meta property="og:site_name" content="sleepyhead沉思录">
+<meta property="og:description" content="HashMap和Hashtable的区别首先总结有几点不同：  父类不同 null值相关问题不同 线程安全性不同 遍历方式不同 初始容量不同 计算哈希值方法不同  Hashtable是Java一开始发布时就提供的键值映射的数据结构，而HashMap产生于JDK1.2。现在Hashtable基本上被弃用了，而HashMap已经成为应用最广泛的一种数据类型。 父类不同HashMap继承于Abstrac">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-06T02:45:59.557Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HashMap和Hashtable的区别">
+<meta name="twitter:description" content="HashMap和Hashtable的区别首先总结有几点不同：  父类不同 null值相关问题不同 线程安全性不同 遍历方式不同 初始容量不同 计算哈希值方法不同  Hashtable是Java一开始发布时就提供的键值映射的数据结构，而HashMap产生于JDK1.2。现在Hashtable基本上被弃用了，而HashMap已经成为应用最广泛的一种数据类型。 父类不同HashMap继承于Abstrac">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/06/HashMap和Hashtable的区别/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>HashMap和Hashtable的区别 | sleepyhead沉思录</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">sleepyhead沉思录</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">繁荣昌盛，生生不息</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archives"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/06/HashMap和Hashtable的区别/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">HashMap和Hashtable的区别
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-06 09:44:31 / 修改时间：10:45:59" itemprop="dateCreated datePublished" datetime="2019-04-06T09:44:31+08:00">2019-04-06</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/06/HashMap和Hashtable的区别/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/04/06/HashMap和Hashtable的区别/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="HashMap和Hashtable的区别"><a href="#HashMap和Hashtable的区别" class="headerlink" title="HashMap和Hashtable的区别"></a>HashMap和Hashtable的区别</h2><p>首先总结有几点不同：</p>
+<ul>
+<li>父类不同</li>
+<li>null值相关问题不同</li>
+<li>线程安全性不同</li>
+<li>遍历方式不同</li>
+<li>初始容量不同</li>
+<li>计算哈希值方法不同</li>
+</ul>
+<p>Hashtable是Java一开始发布时就提供的键值映射的数据结构，而HashMap产生于JDK1.2。现在Hashtable基本上被弃用了，而HashMap已经成为应用最广泛的一种数据类型。</p>
+<h4 id="父类不同"><a href="#父类不同" class="headerlink" title="父类不同"></a>父类不同</h4><p>HashMap继承于AbstractMap类，而Hashtable继承于Dictionary（已被废弃）。不过它们都同时实现了map，Cloneable（可复制），Serializable（可序列化）这三个接口。</p>
+<p>而Hashtable比HashMap多提供了elements()和contains()两个方法，elements继承于Hashtable的父类Dictionary，elements()用于返回此Hashtable中的value的枚举。contains()方法判断该Hashtable是否包含传入的value。</p>
+<h4 id="null值不同"><a href="#null值不同" class="headerlink" title="null值不同"></a>null值不同</h4><p>Hashtable既不支持null的key也不支持null的value。这一点在Hashtable的put()方法中有说明。而在HashMap中，<strong>null可以作为键，这样的键只有一个。而可以有一个或多个键所对应的值为null</strong>。当get()方法返回null值时，<strong>可能是HashMap中没有该键，也可能是该键所对应的值为null</strong>。所以在HashMap中不能用get()方法来判断HashMap中是否存在某个键，而应该用containsKey()方法来判断。</p>
+<h4 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h4><p>Hashtable是线程安全的，其每个方法中都加入了Synchronize方法。在多线程并发的环境下，可以直接使用Hashtable，不需要自己为它的方法实现同步。</p>
+<p>而HashMap不是线程安全的，在多线程并发的环境下可能出现一系列问题，使用HashMap时必须自己添加同步处理。</p>
+<p>虽然HashMap不是线程安全的，但是<strong>其效率会比Hashtable好很多 </strong>，这样设计是合理的，我们在日常使用HashMap时大部分时间是单线程操作的。如果你需要多线程操作，请你使用ConcurrentHashMap，它的效率比Hashtable高很多倍，因为ConcurrentHashMap使用了分段锁，并不会对整个数据进行锁定。(ConcurrentHashMap出现于JDK1.5)</p>
+<h4 id="遍历方式不同"><a href="#遍历方式不同" class="headerlink" title="遍历方式不同"></a>遍历方式不同</h4><p>Hashtable和HashMap都使用了Iterator。而由于历史遗留因素，Hashtable还使用了Enumeration的方式。</p>
+<p>HashMap的Iterator是fail-fast迭代器。有其他线程改变了HashMap的结构（增加，删除，修改元素），会抛出ConcurrentModificationException异常。不过若是<strong>通过Iterator的remove()方法</strong>移除元素则不会抛出ConcurrentModificationException异常。</p>
+<p>在JDK1.8的版本中，Hashtable没有fast-fail机制。而在JDK1.8后的版本中，Hashtable也使用fast-fail。</p>
+<h4 id="初始容量不同"><a href="#初始容量不同" class="headerlink" title="初始容量不同"></a>初始容量不同</h4><p>Hashtable的初始长度为11，之后每次扩容变为之前的2n+1(n为上一次长度)</p>
+<p>HashMap的初始长度为16，之后每次扩容变为原来的两倍</p>
+<p><strong>创建时，如果给定容量初始值，Hashtable会直接使用你给定的大小，而HashMap会将其扩充为2的幂次方大小</strong>。</p>
+<h4 id="计算哈希值的方法不同"><a href="#计算哈希值的方法不同" class="headerlink" title="计算哈希值的方法不同"></a>计算哈希值的方法不同</h4><p>计算哈希值是为了得到元素的位置，为得到元素的位置，首先需要根据元素的key计算出一个hash值，然后用这个hash值计算得到最终的位置。</p>
+<p>Hashtable直接使用对象的hashCode，hashCode是JDK根据对象的地址或字符串或数字算出来的int类型的数值，再通过除留余数来获得最终的位置。但是除法运算很耗费时间，效率不高。</p>
+<p>HashMap为提高计算效率，将哈希表大小固定为2的幂，在取模运算时，不需要做除法，只需要做位运算。位运算比除法效率高的多。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/01/final关键字/" rel="next" title="final关键字">
+                <i class="fa fa-chevron-left"></i> final关键字
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/06/工厂模式的多种写法/" rel="prev" title="工厂模式的多种写法">
+                工厂模式的多种写法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">段铭</p>
+              <p class="site-description motion-element" itemprop="description">编程随想</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HashMap和Hashtable的区别"><span class="nav-number">1.</span> <span class="nav-text">HashMap和Hashtable的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#父类不同"><span class="nav-number">1.0.1.</span> <span class="nav-text">父类不同</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#null值不同"><span class="nav-number">1.0.2.</span> <span class="nav-text">null值不同</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程安全性"><span class="nav-number">1.0.3.</span> <span class="nav-text">线程安全性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#遍历方式不同"><span class="nav-number">1.0.4.</span> <span class="nav-text">遍历方式不同</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始容量不同"><span class="nav-number">1.0.5.</span> <span class="nav-text">初始容量不同</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算哈希值的方法不同"><span class="nav-number">1.0.6.</span> <span class="nav-text">计算哈希值的方法不同</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">段铭</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.7.0"></script>
+
+  <script src="/js/src/motion.js?v=6.7.0"></script>
+
+
+
+  
+  
+
+  
+  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
+<script src="/js/src/post-details.js?v=6.7.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
+
+
+
+  
+  
+    
+  <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+
+
+<script>
+  var disqus_config = function () {
+    this.page.url = "http://yoursite.com/2019/04/06/HashMap和Hashtable的区别/";
+    this.page.identifier = "2019/04/06/HashMap和Hashtable的区别/";
+    this.page.title = 'HashMap和Hashtable的区别';
+    };
+  function loadComments () {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', '' + +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  
+    loadComments();
+  
+</script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

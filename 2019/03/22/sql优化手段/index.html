@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=6.7.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.7.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.7.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.7.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.7.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Mysql查询性能优化常见手段为了实现高性能，需要合适的库表结构，建立最好的索引，但是这些还不够，还需要合理的设计查询，查询如果写的很糟糕，即使库表结构再合理，索引再合适，也无法实现高性能。 编写高效Mysql查询的同时可以学习到如何设计表和索引会使查询更加高效，同时可以知道在优化库表结构时会影响到哪些类型查询的效率。 这篇文章剖析MySQL如何真正执行查询，分析高效和低效的原因所在，充分发挥My">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sql优化手段">
+<meta property="og:url" content="http://yoursite.com/2019/03/22/sql优化手段/index.html">
+<meta property="og:site_name" content="sleepyhead沉思录">
+<meta property="og:description" content="Mysql查询性能优化常见手段为了实现高性能，需要合适的库表结构，建立最好的索引，但是这些还不够，还需要合理的设计查询，查询如果写的很糟糕，即使库表结构再合理，索引再合适，也无法实现高性能。 编写高效Mysql查询的同时可以学习到如何设计表和索引会使查询更加高效，同时可以知道在优化库表结构时会影响到哪些类型查询的效率。 这篇文章剖析MySQL如何真正执行查询，分析高效和低效的原因所在，充分发挥My">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-05T13:50:48.432Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="sql优化手段">
+<meta name="twitter:description" content="Mysql查询性能优化常见手段为了实现高性能，需要合适的库表结构，建立最好的索引，但是这些还不够，还需要合理的设计查询，查询如果写的很糟糕，即使库表结构再合理，索引再合适，也无法实现高性能。 编写高效Mysql查询的同时可以学习到如何设计表和索引会使查询更加高效，同时可以知道在优化库表结构时会影响到哪些类型查询的效率。 这篇文章剖析MySQL如何真正执行查询，分析高效和低效的原因所在，充分发挥My">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/22/sql优化手段/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>sql优化手段 | sleepyhead沉思录</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">sleepyhead沉思录</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">繁荣昌盛，生生不息</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archives"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/22/sql优化手段/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="段铭">
+      <meta itemprop="description" content="编程随想">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="sleepyhead沉思录">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">sql优化手段
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-22 15:57:56" itemprop="dateCreated datePublished" datetime="2019-03-22T15:57:56+08:00">2019-03-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-05 21:50:48" itemprop="dateModified" datetime="2019-04-05T21:50:48+08:00">2019-04-05</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/22/sql优化手段/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/03/22/sql优化手段/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Mysql查询性能优化常见手段"><a href="#Mysql查询性能优化常见手段" class="headerlink" title="Mysql查询性能优化常见手段"></a>Mysql查询性能优化常见手段</h2><p>为了实现高性能，需要合适的库表结构，建立最好的索引，但是这些还不够，还需要合理的设计查询，查询如果写的很糟糕，即使库表结构再合理，索引再合适，也无法实现高性能。</p>
+<p>编写<strong>高效Mysql查询</strong>的同时可以学习到如何设计表和索引会使查询更加高效，同时可以知道在优化库表结构时会影响到哪些类型查询的效率。</p>
+<p>这篇文章剖析MySQL如何真正执行查询，分析高效和低效的原因所在，充分发挥MySQL的优势并避开其弱点。</p>
+<h3 id="慢查询的产生原因"><a href="#慢查询的产生原因" class="headerlink" title="慢查询的产生原因"></a>慢查询的产生原因</h3><p>查询的关键是响应时间，响应时间越小，效率越高。将查询看作一个任务，这个任务由一系列子任务组成，每个子任务会消耗一定时间。这时若要优化查询，就是要优化其子任务，优化查询子任务的方式有三种，<strong>1.消除其中一些子任务，2.减少子任务的执行次数，3.让子任务运行的更快。</strong></p>
+<p><strong>子任务有哪些呢</strong>，我们按照查询的生命周期来对子任务进行分解：查询从客户端到服务器，然后在服务器上进行解析，生成查询的执行计划，<strong>执行查询</strong>，然后返回查询结果给客户端。其中<strong>执行查询</strong>，是最为重要的阶段，这个阶段中包含<strong>向底层存储引擎检索数据的调用操作</strong>和调用后的数据处理，包括排序，分组等。</p>
+<p>完成这些子任务时，这些<strong>子任务过程需要在不同的地方花费时间</strong>，包括网络，CPU计算，生成统计信息和执行计划，锁等待（互斥等待）等操作，特别是<strong>向底层存储引擎检索数据的调用操作</strong>，这类调用需要内存操作，CPU操作和因内存不足导致的IO操作，因为存储引擎的不同，这还可能产生大量的上下文切换和系统调用。</p>
+<p>每个慢查询案例中，都可以看到一些不必要的额外操作，某些操作可能重复很多次，某些操作可能执行太慢，优化查询的目的就是优化这些不必要的额外操作所浪费的时间。</p>
+<h3 id="慢查询基础：优化数据访问"><a href="#慢查询基础：优化数据访问" class="headerlink" title="慢查询基础：优化数据访问"></a>慢查询基础：优化数据访问</h3><p>查询性能太低的根本原因是<strong>访问的数据太多</strong>，可能有一些查询不可避免的要筛选大量数据，但这并不是一种普遍情况。大部分性能低下的查询都可以通过<strong>减少访问的数据量</strong>的方式进行优化。对低效的查询，可以通过下面的步骤进行分析：</p>
+<p>1.确认<strong>应用程序</strong>是否检索大量超过需要的数据。这可能是访问了太多的行，也可能是访问了大量的列（向数据库请求了不需要的数据）</p>
+<p>2.确认MySQL服务器是否在分析大量超过需要的数据行（MySQL扫描了额外的数据）</p>
+<h4 id="向数据库请求了不需要的数据"><a href="#向数据库请求了不需要的数据" class="headerlink" title="向数据库请求了不需要的数据"></a>向数据库请求了不需要的数据</h4><p>一些查询请求查询了超过实际需要的数据，这些多余的数据会被应用程序丢弃，查询超过实际需要的数据会造成如下后果：1.给MySQL服务器带来额外的负担。2.增加了网络的开销。3.消耗应用程序服务器的CPU和内存资源。</p>
+<p>典型案例：1.查询不需要的记录。2.多表关联时返回全部列。3.总是取出全部列。4.重复查询相同的数据，此时可以通过缓存进行处理，初次查询时将这个数据缓存起来，需要时从缓存中取出，这样有更好的性能。</p>
+<h4 id="MySQL是否在分析额外的数据"><a href="#MySQL是否在分析额外的数据" class="headerlink" title="MySQL是否在分析额外的数据"></a>MySQL是否在分析额外的数据</h4><p>要看看查询为返回结果是否扫描过多数据，MySQL中衡量查询开销有以下几个指标：</p>
+<ul>
+<li>响应时间</li>
+<li>扫描行数</li>
+<li>返回行数</li>
+</ul>
+<p>没有哪个指标能完美衡量查询的开销，这需要综合的来看，几个指标都会记录到MySQL的慢日志中，检查慢日志记录是找出扫描行数过多的查询的好方法。</p>
+<p><strong>响应时间</strong>：响应时间包括两个部分的时间，服务时间和排队时间。服务时间指数据库处理这个查询真正花了多长时间。排队时间指服务器因为等待某些资源而没有真正执行查询的时间——可能是等待I/O操作完成，也可能是等待行锁，一般常见的等待是I/O等待和锁等待。在不同类型的压力下，其实响应时间没有一致的规律或者公式，存储引擎的锁（表锁，行锁），高并发资源竞争，硬件响应等诸多因素都会影响响应时间。在慢日志记录中看到查询的响应时间时首先要知道这是否是一个合理的值。</p>
+<p><strong>扫描的行数和返回的行数</strong>：分析查询时查看扫描的行数是很有帮助的，在一定程度上说明了查询找到需要的数据的效率高不高。理想情况下扫描的行数和返回的行数应该是相同的，但比如在做一个关联查询时，服务器需要扫描多行才能生成结果集中的一行，扫描的行数对返回的行数一般在1:1和10:1之间。</p>
+<p>如果发现查询需要扫描大量的数据而只返回少数的行，可以尝试下面的技巧去进行优化：</p>
+<ul>
+<li>使用索引覆盖扫描，将需要的列放在索引中，存储引擎无须回表获取对应行就可以返回结果</li>
+<li>改变库表结构</li>
+<li>重写复杂查询，让MySQL优化器能以更优化的方式执行这个查询（重构查询的方式）</li>
+</ul>
+<h3 id="重构查询的方式"><a href="#重构查询的方式" class="headerlink" title="重构查询的方式"></a>重构查询的方式</h3><p>优化有问题的查询时，目标是找到更优的方法获得需要的结果。一些时候可以将查询转换一种写法让其返回一样的结果但是有更好的性能，也可以在应用层面修改代码，用另一种方式完成查询，并展示何时需要这种技巧。</p>
+<h4 id="一个复杂查询还是多个简单查询"><a href="#一个复杂查询还是多个简单查询" class="headerlink" title="一个复杂查询还是多个简单查询"></a>一个复杂查询还是多个简单查询</h4><p>设计查询时的一个重要问题是是否需要将一个复杂的查询分成多个简单的查询。传统实现认为数据库层应该完成尽可能多的工作，因为认为网络通信，查询解析和优化是一件代价很高的事情。<strong>但实际上这种想法对MySQL并不适用</strong>，MySQL在设计上让连接和断开连接都很轻量级，在返回一个小的查询结果方面很高效。而且现代的网络速度比以前快很多，无论是带宽还是延迟。某些版本的Mysql上，即使是在一个通用服务器上，也能每秒运行超过10万的查询，即使是一个千兆网卡也能轻松满足每秒超过2000次的查询，所以运行多个小查询现在已经不是什么问题了。</p>
+<p>Mysql内部每秒能扫描内存中上百万行数据，相比之下MySQL响应数据给客户端就慢多了。其他条件都相同时，使用尽可能少的查询当然更好，但一些情况下将一个大查询分解成为多个小查询也是有必要的。这样是有可能减少工作量的。</p>
+<p>不过在应用设计时，一个查询能胜任时还写为多个查询就是不明智的。</p>
+<h4 id="切分查询"><a href="#切分查询" class="headerlink" title="切分查询"></a>切分查询</h4>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/16/乐观锁和悲观锁/" rel="next" title="CAS策略">
+                <i class="fa fa-chevron-left"></i> CAS策略
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/29/2019实习面经-二-华为Cloud-bu实习面经/" rel="prev" title="2019实习面经(二) 华为Cloud bu实习面经">
+                2019实习面经(二) 华为Cloud bu实习面经 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">段铭</p>
+              <p class="site-description motion-element" itemprop="description">编程随想</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql查询性能优化常见手段"><span class="nav-number">1.</span> <span class="nav-text">Mysql查询性能优化常见手段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#慢查询的产生原因"><span class="nav-number">1.1.</span> <span class="nav-text">慢查询的产生原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#慢查询基础：优化数据访问"><span class="nav-number">1.2.</span> <span class="nav-text">慢查询基础：优化数据访问</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#向数据库请求了不需要的数据"><span class="nav-number">1.2.1.</span> <span class="nav-text">向数据库请求了不需要的数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL是否在分析额外的数据"><span class="nav-number">1.2.2.</span> <span class="nav-text">MySQL是否在分析额外的数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重构查询的方式"><span class="nav-number">1.3.</span> <span class="nav-text">重构查询的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一个复杂查询还是多个简单查询"><span class="nav-number">1.3.1.</span> <span class="nav-text">一个复杂查询还是多个简单查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#切分查询"><span class="nav-number">1.3.2.</span> <span class="nav-text">切分查询</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">段铭</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v6.7.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.7.0"></script>
+
+  <script src="/js/src/motion.js?v=6.7.0"></script>
+
+
+
+  
+  
+
+  
+  <script src="/js/src/scrollspy.js?v=6.7.0"></script>
+<script src="/js/src/post-details.js?v=6.7.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.7.0"></script>
+
+
+
+  
+  
+    
+  <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+
+
+<script>
+  var disqus_config = function () {
+    this.page.url = "http://yoursite.com/2019/03/22/sql优化手段/";
+    this.page.identifier = "2019/03/22/sql优化手段/";
+    this.page.title = 'sql优化手段';
+    };
+  function loadComments () {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', '' + +new Date());
+    (d.head || d.body).appendChild(s);
+  }
+  
+    loadComments();
+  
+</script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
